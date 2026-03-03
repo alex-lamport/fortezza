@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architettura della Fortezza - Alex | Flow Architect</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+        }
+        h1, h2, h3 {
+            color: #ffffff;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+        }
+        .container {
+            max-width: 1350px;
+            margin: auto;
+        }
+        .header {
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+        .charts-wrapper {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+            gap: 20px;
+        }
+        .chart-container {
+            width: 450px;
+            text-align: center;
+            background: #151515;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            position: relative;
+        }
+        #cryptoDetailContainer {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        /* Animazione e invito al click per il grafico */
+        .click-instruction {
+            margin-top: 15px;
+            font-size: 0.85em;
+            color: #ff9100;
+            font-weight: 600;
+            animation: pulseText 2s infinite;
+            display: inline-block;
+            background: rgba(255, 145, 0, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 145, 0, 0.3);
+        }
+
+        @keyframes pulseText {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 10px rgba(255, 145, 0, 0.4); }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        /* Stili Tabella */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background-color: #151515;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+        th, td {
+            padding: 22px 20px;
+            text-align: left;
+            border-bottom: 1px solid #222;
+            font-size: 0.92em;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+        th {
+            background-color: #1a1a1a;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75em;
+            letter-spacing: 1px;
+        }
+        .highlight { color: #00e676; font-weight: 500; }
+        .warning { color: #ffb300; font-weight: 500; }
+        .critical { color: #ff5252; font-weight: 500; }
+        .safe { color: #4fc3f7; font-weight: 500; }
+        .protocol-name { font-weight: 600; color: #fff; display: block; margin-bottom: 6px; font-size: 1.1em; }
+        .sub-text { font-size: 0.85em; color: #888; display: block; margin-top: 4px;}
+        .date-badge { display: inline-block; background: #222; color: #aaa; padding: 3px 8px; border-radius: 4px; font-size: 0.75em; margin-top: 8px; border: 1px solid #333; }
+        
+        /* Tooltip per Sail Money */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 1px dashed #4fc3f7;
+        }
+        .tooltip-container .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #111;
+            color: #ddd;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+        .tooltip-container .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip-value { color: #fff; font-weight: 600; float: right; }
+
+        /* Pulsante X (Twitter) */
+        .x-button {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid #333;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .x-button:hover { background-color: #111; border-color: #555; transform: translateY(-1px); }
+
+        /* Footer e Note dell'Architetto */
+        .footer-wrapper {
+            margin-top: 60px;
+            margin-bottom: 40px;
+        }
+        .footer-note {
+            padding: 30px;
+            background: #111;
+            border-left: 5px solid #2962ff;
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #bbb;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .footer-note strong { color: #fff; display: block; margin-bottom: 10px; font-size: 1.1em; }
+        .due-diligence {
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Architettura della Fortezza</h1>
+        <p style="color: #888;">Protocollo Operativo di Gestione e Analisi On-Chain | Flow Architect</p>
+    </div>
+
+    <div class="charts-wrapper">
+        <div class="chart-container">
+            <h3>Asset Allocation Macro</h3>
+            <canvas id="macroChart"></canvas>
+            <div class="click-instruction">👆 Clicca sul segmento "Crypto" per l'analisi granulare</div>
+        </div>
+        <div class="chart-container" id="cryptoDetailContainer">
+            <h3>Scomposizione Big Cap</h3>
+            <canvas id="cryptoChart"></canvas>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%;">Protocollo / Asset</th>
+                <th style="width: 20%;">Capitale & Net Value</th>
+                <th style="width: 20%;">Performance & Rischio</th>
+                <th style="width: 40%;">Outlook Operativo (Flow Architect)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="protocol-name">Loopscale</span> jupSOL (Posizione 1)<br><span class="sub-text">Leva 6,1x</span></td>
+                <td><strong>3,00 jupSOL</strong><br><span class="sub-text">Net Value: $301,98</span><br><span class="date-badge">Apertura Recente</span></td>
+                <td><span class="highlight">+0,06 jupSOL (Yield)</span><br><span class="safe">10,17% APY Netto</span><br><span class="warning">11,88% Health</span></td>
+                <td>Gestione chirurgica del collaterale. Strategia di accumulo yield ottimizzata su Solana con monitoraggio millimetrico del peg e della solvibilità dello smart contract.</td>
+            </tr>
+            <tr>
+                <td><span class="protocol-name">Loopscale</span> jupSOL (Posizione 2)<br><span class="sub-text">Leva 7,0x</span></td>
+                <td><strong>2,49 jupSOL</strong><br><span class="sub-text">Net Value: $250,37</span><br><span class="date-badge">Apertura: 25/02/2026</span></td>
+                <td><span class="highlight">+0,07 jupSOL (Yield)</span><br><span class="safe">10,70% APY Netto</span><br><span class="warning">9,87% Health</span></td>
+                <td>Saturazione dell'efficienza del capitale tramite leva calcolata. Posizionamento tattico per massimizzare il ritorno sul capitale nel breve periodo.</td>
+            </tr>
+            <tr>
+                <td><span class="protocol-name">Loopscale</span> stkESOL<br><span class="sub-text">Leva 9,7x</span></td>
+                <td><strong>10,91 stkESOL</strong><br><span class="sub-text">Net Value: $946,75</span><br><span class="date-badge">Apertura Recente</span></td>
+                <td><span class="highlight">+0,362 stkESOL (Yield)</span><br><span class="safe">25,24% APY Netto</span><br><span class="critical">5,56% Health</span></td>
+                <td>Posizione aggressiva mirata all'accumulo massivo di rewards. Rischio di de-peg monitorato in tempo reale.</td>
+            </tr>
+            <tr>
+                <td><span class="protocol-name">Defi Carrot</span> ONyc (RWA)<br><span class="sub-text">Leva 3,4x</span></td>
+                <td><strong>$1.063,67 (984,92 ONyc)</strong><br><span class="sub-text">Net Value: $1.056,71</span><br><span class="date-badge">Apertura: 18/02/2026</span></td>
+                <td><span class="safe">Posizione Gestita</span><br><span class="warning">Fee: 1,277 ONyc</span></td>
+                <td>Esposizione tattica sui Real World Assets. Delta in ingresso di ~$5 restituito dal protocollo e tracciato chirurgicamente come residuo a wallet.<br>
+                <a href="https://x.com/alex_lamports/status/2028298584081289660?s=20" target="_blank" class="x-button">𝕏 Leggi l'Analisi Forense On-Chain</a>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="protocol-name">Kamino Finance</span> USDG/PYUSD<br><span class="sub-text">Leva 9,1x (Multiply)</span></td>
+                <td><strong>$2.361,20</strong><br><span class="sub-text">Net Value: $2.353,62</span><br><span class="date-badge">Apertura Recente</span></td>
+                <td><span class="safe">13,89% APY Netto</span><br><span class="safe">88,96% LTV</span></td>
+                <td>Yield farming su stable-loop (USDG/PYUSD) per annullare il rischio volatilità. LTV in zona di massima sicurezza (Safe) grazie al peg. Delta di ~$7 in ingresso allocato e tracciato come residuo tecnico a wallet.</td>
+            </tr>
+            <tr>
+                <td><span class="protocol-name">Jupiter Lend</span> EURC<br><span class="sub-text">Liquidità Nativa</span></td>
+                <td><strong>1.453,20 EURC</strong><br><span class="sub-text">Valore Nativo</span><br><span class="date-badge">Riserva</span></td>
+                <td><span class="highlight">+0,86 EURC (Yield)</span><br><span class="safe">2,85% APY Netto</span></td>
+                <td>Riserva Strategica di Collaterale pronta per interventi rapidi a copertura delle posizioni a leva o per ingressi tattici sul mercato.</td>
+            </tr>
+            <tr>
+                <td><span class="protocol-name">Sail Money (AI Agent)</span> EURC<br><span class="sub-text">Automazione Fluid/Gauntlet</span></td>
+                <td><strong>€1.451,74</strong><br><span class="sub-text">Net Value: €1.451,87</span><br><span class="date-badge">Dal 18/02/2026</span></td>
+                <td>
+                    <div class="tooltip-container">
+                        <span class="safe" style="border-bottom: 1px dotted #4fc3f7;">20,00% APY Netto ℹ️</span>
+                        <div class="tooltip-text">
+                            <span style="color: #aaa; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">Yield Attribution Analysis</span><br><br>
+                            Euro APY (Nativo): <span class="tooltip-value">1,83%</span><br>
+                            Points APY (Rewards): <span class="tooltip-value highlight">18,17%</span>
+                        </div>
+                    </div>
+                    <br><span class="safe">100% Liquid</span>
+                </td>
+                <td>Sperimentazione attiva dell'automazione on-chain. L'agente IA ribilancia dinamicamente (attualmente 58,68% Fluid / 41,32% Gauntlet), abbattendo il carico cognitivo del micro-management sulle stablecoin.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer-wrapper">
+        <div class="footer-note">
+            <strong>Nota dell'Architetto</strong>
+            L'estrazione quantitativa del dato è solo metà del lavoro. Questa architettura è costruita seguendo i principi della <em>Neuro-Etica della Sensibilità</em>: il monitoraggio forense dei flussi non è solo numerico, ma serve a decodificare la matrice comportamentale che muove i capitali on-chain.<br><br> Questo ecosistema è il risultato di una collaborazione simbiotica di tre settimane con un'intelligenza artificiale avanzata e l'integrazione parallela di altri due modelli analitici (struttura multi-agente). Questa sinergia ha permesso di scalare rapidamente la gestione del rischio e l'ottimizzazione on-chain, trasformando la complessità dei dati in una strategia operativa coerente e trasparente.
+        </div>
+        <div class="due-diligence">
+            * On-Chain Verification and Wallet Address details are strictly maintained under secure OpSec protocols and available exclusively upon request for professional due diligence.
+        </div>
+    </div>
+</div>
+
+<script>
+    Chart.defaults.color = '#888';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    
+    const ctxMacro = document.getElementById('macroChart').getContext('2d');
+    const macroChart = new Chart(ctxMacro, {
+        type: 'doughnut',
+        data: {
+            labels: ['La Roccia (ETF)', 'Il Paracadute (Liquidità)', 'Crypto (Big Cap)'],
+            datasets: [{
+                data: [36.2, 31.0, 32.8],
+                backgroundColor: ['#2962ff', '#424242', '#ff9100'],
+                borderColor: '#151515',
+                borderWidth: 4,
+                hoverBorderColor: '#333'
+            }]
+        },
+        options: {
+            onHover: (event, chartElement) => {
+                event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            },
+            onClick: (e, elements) => {
+                if (elements.length > 0 && elements[0].index === 2) {
+                    document.getElementById('cryptoDetailContainer').style.display = 'block';
+                    document.querySelector('.click-instruction').style.display = 'none'; // Nasconde l'istruzione dopo il click
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom', padding: 20 }
+            }
+        }
+    });
+
+    const ctxCrypto = document.getElementById('cryptoChart').getContext('2d');
+    new Chart(ctxCrypto, {
+        type: 'pie',
+        data: {
+            labels: ['BTC', 'ETH', 'SOL', 'BNB'],
+            datasets: [{
+                data: [49.1, 14.8, 21.3, 14.8],
+                backgroundColor: ['#f7931a', '#627eea', '#14f195', '#f3ba2f'],
+                borderColor: '#151515',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
