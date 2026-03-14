@@ -677,83 +677,48 @@ document.addEventListener('keydown', function(e) {
 });
 
 async function initLiveEngine() {
-const ids = 'bitcoin,ethereum,solana,binancecoin,bittensor,ondo-finance,jup-solana,tether,chaingpt,jupiter-exchange-solana,realio-network,spx6900';
-    // Modifica Sicurezza: Uso API pubblica senza chiave esposta
-    const cryptoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`;
+    const ids = 'bitcoin,ethereum,solana,binancecoin,bittensor,ondo-finance,jup-solana,tether,chaingpt,jupiter-exchange-solana,realio-network,spx6900';
     
-    // ==========================================
-    // MOTORE 1: CRYPTO (Indipendente)
-    // ==========================================
+    // MOTORE 1: CRYPTO via proxy CORS
     try {
-        const res = await fetch(cryptoUrl);
-        if (res.status === 429) throw new Error("CoinGecko Limite Raggiunto (Pausa)");
-        if (!res.ok) throw new Error(`Errore Server: ${res.status}`);
-
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`)}`;
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error(`Errore: ${res.status}`);
         const data = await res.json();
         if (!data.bitcoin) throw new Error("Dati vuoti");
-
-        livePrices = Object.assign(livePrices, data); 
-        
-        if(data.tether && data.tether.eur) {
+        livePrices = Object.assign(livePrices, data);
+        if (data.tether && data.tether.eur) {
             exchangeRateEurUsd = 1 / data.tether.eur;
             isLiveConnected = true;
-            document.getElementById('liveSignal').style.display = 'block'; 
-            document.getElementById('liveSignal').style.backgroundColor = "#00e676"; 
+            document.getElementById('liveSignal').style.backgroundColor = "#00e676";
             updateForexDisplay();
         }
         console.log("✅ Motore Crypto: Online");
     } catch (err) {
-        console.warn("🟡 Motore Crypto Offline/In Pausa:", err.message);
+        console.warn("🟡 Motore Crypto Offline:", err.message);
         document.getElementById('liveSignal').style.backgroundColor = "orange";
     }
 
-   // ==========================================
-    // MOTORE 2: TRADFI - ETF (Doppio Proxy e Ancora Forense)
-    // ==========================================
+    // MOTORE 2: ETF via proxy CORS
     try {
-        let etfRes;
-        try {
-            // Tentativo 1: AllOrigins (Nuovo Proxy Primario)
-            etfRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE')}`);
-            if (!etfRes.ok) throw new Error("AllOrigins proxy down");
-        } catch (e1) {
-            // Tentativo 2: Corsproxy (Fallback)
-            etfRes = await fetch(`https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE`);
-            if (!etfRes.ok) throw new Error("Corsproxy down");
-        }
-        
-        const yahooData = await etfRes.json(); 
-        
-        if (yahooData && yahooData.chart && yahooData.chart.result && yahooData.chart.result[0]) {
+        const etfProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE')}`;
+        const etfRes = await fetch(etfProxy);
+        if (!etfRes.ok) throw new Error("ETF proxy down");
+        const yahooData = await etfRes.json();
+        if (yahooData?.chart?.result?.[0]) {
             const meta = yahooData.chart.result[0].meta;
             const liveEtfPrice = meta.regularMarketPrice;
-            const prevClose = meta.chartPreviousClose; 
-            
-            let etf24hChange = 0;
-            if (prevClose) {
-                etf24hChange = ((liveEtfPrice - prevClose) / prevClose) * 100;
-            }
-
-            livePrices['msci-world'] = { 
-                eur: liveEtfPrice,
-                eur_24h_change: etf24hChange,
-                usd_24h_change: etf24hChange
-            };
-            console.log(`✅ Motore ETF: Agganciato a Xetra (${liveEtfPrice} € | 24H: ${etf24hChange.toFixed(2)}%)`);
-        } else {
-            throw new Error("Dati Yahoo illeggibili");
-        }
+            const prevClose = meta.chartPreviousClose;
+            const etf24hChange = prevClose ? ((liveEtfPrice - prevClose) / prevClose) * 100 : 0;
+            livePrices['msci-world'] = { eur: liveEtfPrice, eur_24h_change: etf24hChange, usd_24h_change: etf24hChange };
+            console.log(`✅ Motore ETF: ${liveEtfPrice}€`);
+        } else throw new Error("Dati Yahoo illeggibili");
     } catch (etfErr) {
-        console.warn("🟡 Motore ETF Offline: Uso il MANUAL_ETF_PRICE del Config.", etfErr.message);
-        // SCUDO FORENSE: Usa il prezzo dettato dall'Architetto nel CONFIG
-        livePrices['msci-world'] = {
-            eur: CONFIG.MANUAL_ETF_PRICE, 
-            eur_24h_change: 0,
-            usd_24h_change: 0
-        };
+        console.warn("🟡 Motore ETF Offline:", etfErr.message);
+        livePrices['msci-world'] = { eur: CONFIG.MANUAL_ETF_PRICE, eur_24h_change: 0, usd_24h_change: 0 };
     }
 
-    calculateDynamicData(); 
+    calculateDynamicData();
 }
 
     let dataMacroBase = []; let dataMacroMarket = [];
