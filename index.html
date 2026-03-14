@@ -929,7 +929,7 @@ function calculateDynamicData() {
         }
     });
 
-    function updateSalaControllo() {
+   function updateSalaControllo() {
         const p = CONFIG.PORTFOLIO;
         const cur = currentCurrency;
         const sym = cur === 'usd' ? '$' : '€';
@@ -1023,7 +1023,6 @@ function calculateDynamicData() {
             applySort(currentSortColumn, currentSortOrder);
         }
     }
-
 
     function switchView(mode) {
         if (!interfaceUnlocked) return;
