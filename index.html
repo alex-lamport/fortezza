@@ -678,13 +678,18 @@ document.addEventListener('keydown', function(e) {
 
 async function initLiveEngine() {
     const ids = 'bitcoin,ethereum,solana,binancecoin,bittensor,ondo-finance,jup-solana,tether,chaingpt,jupiter-exchange-solana,realio-network,spx6900';
-    
-    // MOTORE 1: CRYPTO via proxy allorigins
+
+    // MOTORE 1: CRYPTO – usa allorigins.win
     try {
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`)}`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+            `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`
+        )}`;
         const res = await fetch(proxyUrl);
-        if (!res.ok) throw new Error(`Errore: ${res.status}`);
+        if (!res.ok) throw new Error(`Proxy Crypto error: ${res.status}`);
         const data = await res.json();
+
+        if (!data.bitcoin) throw new Error("Dati vuoti");
+
         livePrices = Object.assign(livePrices, data);
         if (data.tether && data.tether.eur) {
             exchangeRateEurUsd = 1 / data.tether.eur;
@@ -692,29 +697,52 @@ async function initLiveEngine() {
             document.getElementById('liveSignal').style.backgroundColor = "#00e676";
             updateForexDisplay();
         }
-        console.log("✅ Motore Crypto: Online");
+        console.log("✅ Motore Crypto: Online via allorigins");
     } catch (err) {
         console.warn("🟡 Motore Crypto Offline:", err.message);
         document.getElementById('liveSignal').style.backgroundColor = "orange";
     }
 
-    // MOTORE 2: ETF via proxy allorigins
+    // MOTORE 2: ETF – usa allorigins.win
     try {
-        const etfProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE')}`;
+        const etfProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+            'https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE'
+        )}`;
         const etfRes = await fetch(etfProxy);
-        if (!etfRes.ok) throw new Error("ETF proxy down");
+        if (!etfRes.ok) throw new Error(`Proxy ETF error: ${etfRes.status}`);
         const yahooData = await etfRes.json();
+
         if (yahooData?.chart?.result?.[0]) {
             const meta = yahooData.chart.result[0].meta;
             const liveEtfPrice = meta.regularMarketPrice;
             const prevClose = meta.chartPreviousClose;
             const etf24hChange = prevClose ? ((liveEtfPrice - prevClose) / prevClose) * 100 : 0;
-            livePrices['msci-world'] = { eur: liveEtfPrice, eur_24h_change: etf24hChange, usd_24h_change: etf24hChange };
-            console.log(`✅ Motore ETF: ${liveEtfPrice}€`);
-        } else throw new Error("Dati Yahoo illeggibili");
+            livePrices['msci-world'] = { 
+                eur: liveEtfPrice, 
+                eur_24h_change: etf24hChange, 
+                usd_24h_change: etf24hChange 
+            };
+            console.log(`✅ Motore ETF: ${liveEtfPrice}€ via allorigins`);
+        } else {
+            throw new Error("Dati Yahoo illeggibili");
+        }
     } catch (etfErr) {
         console.warn("🟡 Motore ETF Offline:", etfErr.message);
-        livePrices['msci-world'] = { eur: CONFIG.MANUAL_ETF_PRICE, eur_24h_change: 0, usd_24h_change: 0 };
+        livePrices['msci-world'] = { 
+            eur: CONFIG.MANUAL_ETF_PRICE, 
+            eur_24h_change: 0, 
+            usd_24h_change: 0 
+        };
+    }
+
+    // ── QUI METTI IL CONTROLLO FINALE ────────────────────────────────
+    if (!isLiveConnected) {
+        const msg = document.createElement('span');
+        msg.style.color = '#ff5252';
+        msg.style.fontSize = '0.85em';
+        msg.style.marginLeft = '10px';
+        msg.innerText = 'API offline – usando prezzi manuali/base';
+        document.getElementById('viewModeLabel').appendChild(msg);
     }
 
     calculateDynamicData();
