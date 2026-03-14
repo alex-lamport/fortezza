@@ -917,11 +917,11 @@ function calculateDynamicData() {
             el.setAttribute('data-base-html', el.innerHTML);
         }
 
-        if (isLiveConnected && isMarketView && livePrices[assetId]) {
-            // Modo Live
-            const val = qty * livePrices[assetId][cur];
-            el.innerHTML = `Net Value: ${sym} <span class="sensitive-data">${val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
-            el.classList.add('live-value-highlight');
+       if (isLiveConnected && isMarketView && livePrices[assetId]) {
+    // Modo Live — DeFi Matrix sempre in USD (prezzi on-chain nativi)
+    const usdPrice = livePrices[assetId].usd || livePrices[assetId].eur * exchangeRateEurUsd;
+    const val = qty * usdPrice;
+    el.innerHTML = `Net Value: $ <span class="sensitive-data">${val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;            el.classList.add('live-value-highlight');
         } else {
             // Modo Punti Zero (o se API Offline): Ripristina il backup esatto
             el.innerHTML = el.getAttribute('data-base-html');
