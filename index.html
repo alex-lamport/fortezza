@@ -681,10 +681,8 @@ async function initLiveEngine() {
 
     // MOTORE 1: CRYPTO – usa allorigins.win
     try {
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`
-        )}`;
-        const res = await fetch(proxyUrl);
+       const cryptoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true&x_cg_demo_api_key=CG-KtjDDqNTQV913sibchfargSc`;
+const res = await fetch(cryptoUrl);
         if (!res.ok) throw new Error(`Proxy Crypto error: ${res.status}`);
         const data = await res.json();
 
