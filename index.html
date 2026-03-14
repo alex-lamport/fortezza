@@ -941,7 +941,7 @@ function calculateDynamicData() {
         ];
 
         const tbody = document.getElementById('tickerBody');
-        // Usiamo i vecchi elementi o ricreiamo per sicurezza
+        
         assets.forEach(asset => {
             const qtyEl = document.getElementById(`qty-${asset.id}`); 
             const priceEl = document.getElementById(`price-${asset.id}`);
@@ -951,38 +951,41 @@ function calculateDynamicData() {
 
             if (priceEl && valEl && col6El && changeEl) {
                 let isBasket = asset.id === 'low-cap-index';
-let qty = 0, baseCostEur = 0, investedCapital = 0, liveP = 0, isOnline = false, change24h = 0, totalVal = 0;
+                let qty = 0, baseCostEur = 0, investedCapital = 0, liveP = 0, isOnline = false, change24h = 0, totalVal = 0;
 
-if (isBasket) {
-    qty = 4; // Mostriamo il numero di asset nel basket
-    baseCostEur = p.crypto[asset.id].computedBaseEur || 0;
-    investedCapital = cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur;
-    totalVal = p.crypto[asset.id].computedLive || 0;
-    change24h = p.crypto[asset.id].computedChange || 0;
-    isOnline = isLiveConnected;
-    liveP = totalVal; 
-} else {
-    qty = asset.type === 'crypto' ? (p.crypto[asset.id]?.qty || 0) : (p.etf[asset.id]?.qty || 0);
-    baseCostEur = asset.type === 'crypto' ? (p.crypto[asset.id]?.basePriceEur || 0) : (p.etf[asset.id]?.basePriceEur || 0);
-    investedCapital = qty * (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur);
-    
-    if (isLiveConnected && livePrices[asset.id] && livePrices[asset.id][cur]) {
-        liveP = livePrices[asset.id][cur];
-        change24h = asset.type === 'crypto' ? (livePrices[asset.id][`${cur}_24h_change`] || 0) : (livePrices[asset.id].eur_24h_change || 0);
-        isOnline = true;
-    } else { 
-        liveP = (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur); 
-        isOnline = false; 
-    }
-    totalVal = qty * liveP;
-}
+                if (isBasket) {
+                    qty = 4;
+                    baseCostEur = p.crypto[asset.id].computedBaseEur || 0;
+                    investedCapital = cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur;
+                    totalVal = p.crypto[asset.id].computedLive || 0;
+                    change24h = p.crypto[asset.id].computedChange || 0;
+                    isOnline = isLiveConnected;
+                    liveP = totalVal; 
+                } else {
+                    qty = asset.type === 'crypto' ? (p.crypto[asset.id]?.qty || 0) : (p.etf[asset.id]?.qty || 0);
+                    baseCostEur = asset.type === 'crypto' ? (p.crypto[asset.id]?.basePriceEur || 0) : (p.etf[asset.id]?.basePriceEur || 0);
+                    investedCapital = qty * (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur);
+                    
+                    if (isLiveConnected && livePrices[asset.id] && livePrices[asset.id][cur]) {
+                        liveP = livePrices[asset.id][cur];
+                        change24h = asset.type === 'crypto' ? (livePrices[asset.id][`${cur}_24h_change`] || 0) : (livePrices[asset.id].eur_24h_change || 0);
+                        isOnline = true;
+                    } else { 
+                        liveP = (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur); 
+                        isOnline = false; 
+                    }
+                    totalVal = qty * liveP;
+                }
 
                 if (qtyEl) qtyEl.innerHTML = `<span class="sensitive-data">${isBasket ? '4 Assets' : qty.toLocaleString('en-US',{maximumFractionDigits:5})}</span>`;
                 
                 if (isMarketView && isOnline) {
                     changeEl.innerHTML = `<span style="color: ${change24h >= 0 ? '#00e676' : '#ff5252'}; font-family: monospace; font-weight:600;">${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%</span>`;
+                    
+                    // --- IL TUO INTERVENTO: 2 decimali ETF, 4 decimali Crypto ---
                     let maxDec = asset.type === 'etf' ? 2 : 4;
                     priceEl.innerHTML = `<span class="live-value-highlight">${isBasket ? 'Avg Index' : sym + ' ' + liveP.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: maxDec})}</span>`;
+                    
                     valEl.innerHTML = `<span class="live-value-highlight"><span class="sensitive-data">${sym} ${totalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
                     
                     if (currentViewMode === 'tgt' && asset.type === 'crypto') {
@@ -997,26 +1000,22 @@ if (isBasket) {
                         let pnlV = totalVal - investedCapital;
                         let pnlP = (investedCapital > 0) ? (pnlV / investedCapital) * 100 : 0;
                         let sign = pnlV >= 0 ? '+' : '-';
-                        
                         let strVal = `${sign}${sym}${Math.abs(pnlV).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                         let strPct = `${sign}${Math.abs(pnlP).toFixed(2)}%`;
 
                         if (currentViewMode === 'pnl_val') {
-                            // MODO VAL: Valore primario blurrato, Percentuale secondaria in chiaro tra parentesi
                             col6El.innerHTML = `<span style="color: ${pnlV >= 0 ? '#00e676' : '#ff5252'}; font-weight: bold; font-family:monospace; font-size:1.1em;"><span class="sensitive-data">${strVal}</span> <br><span style="font-size:0.85em; opacity:0.8;">(${strPct})</span></span>`;
                         } else {
-                            // MODO %: Percentuale primaria in chiaro, Valore secondario blurrato (PARENTESI INCLUSE NEL BLUR)
                             col6El.innerHTML = `<span style="color: ${pnlV >= 0 ? '#00e676' : '#ff5252'}; font-weight: bold; font-family:monospace; font-size:1.1em;">${strPct} <br><span style="font-size:0.85em; opacity:0.8;"><span class="sensitive-data">(${strVal})</span></span></span>`;
                         }
                     }
                 } else {
-    changeEl.innerHTML = `<span style="color: #444; font-family: monospace;">--</span>`;
-    let prezzoMostrato = isBasket ? 'Basket Index' : sym + (cur === 'usd' ? (p.crypto[asset.id] ? p.crypto[asset.id].basePriceEur : p.etf[asset.id].basePriceEur) * exchangeRateEurUsd : (p.crypto[asset.id] ? p.crypto[asset.id].basePriceEur : p.etf[asset.id].basePriceEur)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    
-    priceEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${prezzoMostrato}</span> <span style="font-size: 0.7em; color: #555; font-family: monospace;">(Entry)</span></span>`;
-    valEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${sym}${investedCapital.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
-    col6El.innerHTML = `<span class="badge spento">Punto Zero</span>`;
-}
+                    changeEl.innerHTML = `<span style="color: #444; font-family: monospace;">--</span>`;
+                    let prezzoMostrato = isBasket ? 'Basket Index' : sym + (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    priceEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${prezzoMostrato}</span> <span style="font-size: 0.7em; color: #555; font-family: monospace;">(Entry)</span></span>`;
+                    valEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${sym}${investedCapital.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
+                    col6El.innerHTML = `<span class="badge spento">Punto Zero</span>`;
+                }
             }
         });
         
