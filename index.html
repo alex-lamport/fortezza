@@ -545,7 +545,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                                 <span class="date-badge">26/02/2026 - 10:15</span>
                             </td>
                             <td>
-                                <div class="ticker-val"><img src="img/onyc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png'"> <span class="sensitive-data">4,251.70</span> ONyc <div class="reward-dot"></div></div>
+                                <div class="ticker-val"><img src="https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png'"> <span class="sensitive-data">4,251.70</span> ONyc <div class="reward-dot"></div></div>
                                 <div class="ticker-usd" data-cg-id="ondo-finance" data-qty="4,251.70">Net Value: $ <span class="sensitive-data">4,598.64</span></div>
                             </td>
                             <td>
@@ -562,7 +562,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                                 <span class="date-badge">26/02/2026 - 00:47</span>
                             </td>
                             <td>
-                                <div class="ticker-val"><img src="img/onyc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png'"> <span class="sensitive-data">3,841.19</span> ONyc <div class="reward-dot"></div></div>
+                                <div class="ticker-val"><img src="https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png'"> <span class="sensitive-data">3,841.19</span> ONyc <div class="reward-dot"></div></div>
                                 <div class="ticker-usd" data-cg-id="ondo-finance" data-qty="3841.19">Net Value: $ <span class="sensitive-data">4,121.17</span></div>
                             </td>
                             <td>
@@ -950,27 +950,31 @@ function calculateDynamicData() {
 
             if (priceEl && valEl && col6El && changeEl) {
                 let isBasket = asset.id === 'low-cap-index';
-let qty, baseCostEur, investedCapital, liveP, isOnline, change24h, totalVal;
+let qty = 0, baseCostEur = 0, investedCapital = 0, liveP = 0, isOnline = false, change24h = 0, totalVal = 0;
 
 if (isBasket) {
     qty = 4; // Mostriamo il numero di asset nel basket
-    baseCostEur = p.crypto[asset.id].computedBaseEur;
+    baseCostEur = p.crypto[asset.id].computedBaseEur || 0;
     investedCapital = cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur;
-    totalVal = p.crypto[asset.id].computedLive;
-    change24h = p.crypto[asset.id].computedChange;
+    totalVal = p.crypto[asset.id].computedLive || 0;
+    change24h = p.crypto[asset.id].computedChange || 0;
     isOnline = isLiveConnected;
     liveP = totalVal; 
 } else {
-                    qty = asset.type === 'crypto' ? p.crypto[asset.id].qty : p.etf[asset.id].qty;
-                    baseCostEur = asset.type === 'crypto' ? p.crypto[asset.id].basePriceEur : p.etf[asset.id].basePriceEur;
-                    investedCapital = qty * (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur);
-                    if (isLiveConnected && livePrices[asset.id] && livePrices[asset.id].eur) {
-                        liveP = cur === 'usd' ? (livePrices[asset.id].usd || livePrices[asset.id].eur * exchangeRateEurUsd) : livePrices[asset.id].eur;
-                        change24h = asset.type === 'crypto' ? livePrices[asset.id][`${cur}_24h_change`] : livePrices[asset.id].eur_24h_change;
-                        isOnline = true;
-                    } else { liveP = (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur); isOnline = false; }
-                    totalVal = qty * liveP;
-                }
+    qty = asset.type === 'crypto' ? (p.crypto[asset.id]?.qty || 0) : (p.etf[asset.id]?.qty || 0);
+    baseCostEur = asset.type === 'crypto' ? (p.crypto[asset.id]?.basePriceEur || 0) : (p.etf[asset.id]?.basePriceEur || 0);
+    investedCapital = qty * (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur);
+    
+    if (isLiveConnected && livePrices[asset.id] && livePrices[asset.id][cur]) {
+        liveP = livePrices[asset.id][cur];
+        change24h = asset.type === 'crypto' ? (livePrices[asset.id][`${cur}_24h_change`] || 0) : (livePrices[asset.id].eur_24h_change || 0);
+        isOnline = true;
+    } else { 
+        liveP = (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur); 
+        isOnline = false; 
+    }
+    totalVal = qty * liveP;
+}
 
                 if (qtyEl) qtyEl.innerHTML = `<span class="sensitive-data">${isBasket ? '4 Assets' : qty.toLocaleString('en-US',{maximumFractionDigits:5})}</span>`;
                 
