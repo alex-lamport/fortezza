@@ -5,342 +5,1884 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Architettura della Fortezza - Alex | Flow Architect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // OPSEC: Nessuna API Key esposta.
+    const CONFIG = {
+        MANUAL_ETF_PRICE: 113.00, 
+        PORTFOLIO: {
+            crypto: {
+                bitcoin:         { qty: 0.197457, basePriceEur: 41334, target: 49 },
+                solana:          { qty: 67.977,   basePriceEur: 94.64, target: 17 },
+                ethereum:        { qty: 2.04711,  basePriceEur: 2102,  target: 12 },
+                binancecoin:     { qty: 6.41589,  basePriceEur: 371,   target: 12 },
+                "ondo-finance":  { qty: 4680,     basePriceEur: 0.2079, target: 4 },
+                bittensor:       { qty: 3.37896,  basePriceEur: 143.93, target: 4 },
+                "low-cap-index": { 
+                    isBasket: true, 
+                    target: 2, 
+                    deadCapitalEur: 653.64, 
+                    assets: {
+                        "chaingpt":                { qty: 5950.4589, basePriceEur: 0.2042 },
+                        "jupiter-exchange-solana": { qty: 1082.6880,  basePriceEur: 0.9252 },
+                        "realio-network":          { qty: 1350.3824,  basePriceEur: 0.9348 },
+                        "spx6900":                 { qty: 699.3601,  basePriceEur: 0.5844 }
+                    }
+                }
+            },
+            etf: {
+                "msci-world": { qty: 235.326, basePriceEur: 103.44 }
+            },
+            liquidity: {
+                eurc: 11285.63,
+                usdc: { qty: 13357.50, basePriceEur: 0.85 }
+            }
+        }
+    };
+    </script>
     <style>
-        body {
-            background-color: #0d0d0d;
-            color: #e0e0e0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 40px;
-        }
-        h1, h2, h3 {
-            color: #ffffff;
-            font-weight: 400;
-            letter-spacing: -0.5px;
-        }
-        .container {
-            max-width: 1350px;
-            margin: auto;
-        }
-        .header {
-            border-bottom: 1px solid #2a2a2a;
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-        }
-        .charts-wrapper {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin-bottom: 50px;
-            gap: 20px;
-        }
-        .chart-container {
-            width: 450px;
-            text-align: center;
-            background: #151515;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #222;
-            position: relative;
-        }
-        #cryptoDetailContainer {
-            display: none;
-            animation: fadeIn 0.4s ease-in-out;
-        }
+        body { background-color: #0d0d0d; color: #e0e0e0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px; transition: all 0.3s ease; overflow-x: hidden; }
+        h1, h2, h3 { color: #ffffff; font-weight: 400; letter-spacing: -0.5px; }
+        .container { max-width: 1350px; margin: auto; }
+        .header { border-bottom: 1px solid #2a2a2a; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header-title p { color: #888; margin: 5px 0 0 0; }
         
-        /* Animazione e invito al click per il grafico */
-        .click-instruction {
-            margin-top: 15px;
-            font-size: 0.85em;
-            color: #ff9100;
-            font-weight: 600;
-            animation: pulseText 2s infinite;
-            display: inline-block;
-            background: rgba(255, 145, 0, 0.1);
-            padding: 5px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 145, 0, 0.3);
-        }
-
-        @keyframes pulseText {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 10px rgba(255, 145, 0, 0.4); }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-
-        /* Stili Tabella */
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 20px;
-            background-color: #151515;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #222;
-        }
-        th, td {
-            padding: 22px 20px;
-            text-align: left;
-            border-bottom: 1px solid #222;
-            font-size: 0.92em;
-            vertical-align: top;
-            line-height: 1.6;
-        }
-        th {
-            background-color: #1a1a1a;
-            color: #888;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.75em;
-            letter-spacing: 1px;
-        }
-        .highlight { color: #00e676; font-weight: 500; }
-        .warning { color: #ffb300; font-weight: 500; }
-        .critical { color: #ff5252; font-weight: 500; }
-        .safe { color: #4fc3f7; font-weight: 500; }
-        .protocol-name { font-weight: 600; color: #fff; display: block; margin-bottom: 6px; font-size: 1.1em; }
-        .sub-text { font-size: 0.85em; color: #888; display: block; margin-top: 4px;}
-        .date-badge { display: inline-block; background: #222; color: #aaa; padding: 3px 8px; border-radius: 4px; font-size: 0.75em; margin-top: 8px; border: 1px solid #333; }
+        .controls-wrapper { display: flex; gap: 15px; flex-wrap: wrap; }
+        .market-btn { background-color: rgba(20, 20, 25, 0.6); color: #666; border: 1px solid #333; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; backdrop-filter: blur(4px); }
+        .market-btn svg { fill: #666; width: 14px; height: 14px; transition: fill 0.3s ease; }
+        .market-btn:hover { border-color: #555; color: #aaa; }
+        .market-btn:hover svg { fill: #aaa; }
+        .market-btn.active { border-color: #00e5ff; color: #00e5ff; background-color: rgba(0, 229, 255, 0.05); box-shadow: 0 0 10px rgba(0, 229, 255, 0.15), inset 0 0 5px rgba(0, 229, 255, 0.05); }
+        .market-btn.active svg { fill: #00e5ff; }
         
-        /* Tooltip per Sail Money */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-            border-bottom: 1px dashed #4fc3f7;
-        }
-        .tooltip-container .tooltip-text {
-            visibility: hidden;
-            width: 220px;
-            background-color: #111;
-            color: #ddd;
-            text-align: left;
-            border-radius: 8px;
-            padding: 12px;
-            position: absolute;
-            z-index: 10;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -110px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            border: 1px solid #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            font-size: 0.9em;
-            font-weight: normal;
-        }
-        .tooltip-container .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-        .tooltip-value { color: #fff; font-weight: 600; float: right; }
+        #currencyBtn { width: 42px; height: 42px; justify-content: center; font-size: 1.3em; padding: 0 !important; }
+        .btn-eur { border-color: #003399 !important; color: #FFCC00 !important; background-color: rgba(0, 51, 153, 0.1) !important; box-shadow: 0 0 12px rgba(0, 51, 153, 0.6), inset 0 0 5px rgba(255, 204, 0, 0.2) !important; text-shadow: 0 0 6px rgba(255, 204, 0, 0.8); font-weight: 400; }
+        .btn-usd { border-color: #00e676 !important; color: #00e676 !important; background-color: rgba(0, 230, 118, 0.05) !important; box-shadow: 0 0 10px rgba(0, 230, 118, 0.15); text-shadow: 0 0 6px rgba(0, 230, 118, 0.6); font-weight: 400; }
 
-        /* Pulsante X (Twitter) */
-        .x-button {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 8px 16px;
-            background-color: #000;
-            color: #fff;
-            text-decoration: none;
-            border: 1px solid #333;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        .x-button:hover { background-color: #111; border-color: #555; transform: translateY(-1px); }
+        #viewModeLabel { text-align: center; margin-bottom: 30px; color: #888; font-size: 0.95em; padding: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #333; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        #viewModeLabel strong { color: #fff; letter-spacing: 0.5px; }
+        
+        .live-indicator { width: 8px; height: 8px; background-color: #00e676; border-radius: 50%; box-shadow: 0 0 8px #00e676; display: none; animation: pulseLive 2s infinite; }
+        @keyframes pulseLive { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* Footer e Note dell'Architetto */
-        .footer-wrapper {
-            margin-top: 60px;
-            margin-bottom: 40px;
-        }
-        .footer-note {
-            padding: 30px;
-            background: #111;
-            border-left: 5px solid #2962ff;
-            border-radius: 8px;
-            font-size: 0.95em;
-            color: #bbb;
-            line-height: 1.7;
-            margin-bottom: 20px;
-        }
+        .charts-wrapper { display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 50px; gap: 20px; }
+        .chart-container { width: 450px; text-align: center; background: #151515; padding: 30px; border-radius: 12px; border: 1px solid #222; position: relative; transition: all 0.5s ease; min-height: 420px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+        
+        .chart-layer { position: absolute; top: 100px; left: 40px; right: 40px; bottom: 30px; display: flex; flex-direction: column; justify-content: center; align-items: stretch; transition: opacity 0.4s ease, filter 0.4s ease; }
+        #macroChartContainer { opacity: 1; z-index: 2; }
+        #macroTgtWrapper { opacity: 0; z-index: 1; pointer-events: none; display: flex; flex-direction: column; justify-content: center; gap: 25px; padding-top: 40px;}
+        body.macro-tgt-active #macroChartContainer { opacity: 0; pointer-events: none; filter: blur(5px); }
+        body.macro-tgt-active #macroTgtWrapper { opacity: 1; pointer-events: all; }
+
+        .macro-tgt-row { width: 100%; text-align: left; }
+        .macro-tgt-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+        .macro-tgt-title { color: #fff; font-weight: 500; font-size: 1.1em; letter-spacing: 0.5px;}
+        .macro-tgt-numbers { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.85em; color: #aaa; }
+        
+        .macro-bar-container { width: 100%; height: 8px; background: #1a1a24; border-radius: 4px; position: relative; overflow: visible; margin-top: 4px;}
+        .macro-bar-container::before { content: ''; position: absolute; left: 50%; top: -4px; width: 2px; height: 16px; background-color: #777; z-index: 2; }
+        .macro-bar-fill { position: absolute; height: 100%; border-radius: 4px; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .macro-bar-fill.under { right: 50%; background: #00e676; box-shadow: 0 0 12px rgba(0, 230, 118, 0.5); transform-origin: right; }
+        .macro-bar-fill.over { left: 50%; background: #ff5252; box-shadow: 0 0 12px rgba(255, 82, 82, 0.5); transform-origin: left; }
+
+        .legend-dot-under { width: 6px; height: 6px; background-color: #00e676; border-radius: 50%; box-shadow: 0 0 6px #00e676; }
+        .legend-dot-over { width: 6px; height: 6px; background-color: #ff5252; border-radius: 50%; box-shadow: 0 0 6px #ff5252; }
+        .tgt-legend-wrapper { position: absolute; bottom: 25px; left: 30px; display: flex; align-items: center; gap: 6px; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+        body.macro-tgt-active .tgt-legend-wrapper { opacity: 1; }
+        
+        canvas { transition: filter 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+        #detailChartContainer { opacity: 0.15; filter: grayscale(80%); transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+
+        .table-control-bar { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; margin-bottom: 15px; padding: 0 10px; flex-wrap: wrap; gap: 15px;}
+        .table-title-group { display: flex; flex-direction: column; gap: 4px; }
+        .table-title { color: #fff; margin: 0; font-weight: 500; font-size: 1.1em; letter-spacing: 0.5px; }
+        
+        .legend-wrapper { display: flex; align-items: center; gap: 6px; }
+        .legend-dot-static { width: 4px; height: 4px; background-color: #ffeb3b; border-radius: 50%; opacity: 0.8; }
+        .legend-text { color: #666; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.65em; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; }
+
+        .privacy-toggle-cupo { background-color: #121212; color: #4fc3f7; border: 1px solid #1a4abf; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8em; letter-spacing: 0.5px; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; height: fit-content; }
+        .privacy-toggle-cupo:hover { background-color: #1a4abf; color: #fff; box-shadow: 0 0 10px rgba(41, 98, 255, 0.4); }
+        body.privacy-on .sensitive-data { filter: blur(7px); user-select: none; transition: filter 0.3s ease; }
+
+        .slider-wrapper { width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; border-radius: 12px; border: 1px solid #222; }
+        .slider-wrapper::-webkit-scrollbar { display: none; } 
+        .slider-track { display: flex; width: 300%; }
+        .slide { width: 33.333%; scroll-snap-align: start; box-sizing: border-box; }
+table { width: 100%; border-collapse: collapse; background-color: #151515; border-style: hidden; }
+
+        .slider-dots { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .dot { width: 6px; height: 6px; background: #333; border-radius: 50%; transition: all 0.3s ease; }
+        .dot.active { background: #00e5ff; box-shadow: 0 0 8px #00e5ff; transform: scale(1.3); }
+
+        table { width: 100%; border-collapse: collapse; background-color: #151515; border-style: hidden; min-width: 800px;}
+        thead th { background-color: #08080a; color: #666; font-weight: 700; text-transform: uppercase; font-size: 0.7em; letter-spacing: 2px; border-bottom: 2px solid #00e5ff; padding: 16px 20px; text-align: left; }
+        
+        body.unlocked .sortable-header { cursor: pointer; transition: color 0.2s ease, border-bottom 0.2s ease; position: relative; }
+        body.unlocked .sortable-header:hover { color: #fff; }
+        body.unlocked .sortable-header::after { content: ''; position: absolute; left: 20px; bottom: 4px; width: 20px; height: 2px; background-color: transparent; transition: background-color 0.2s ease; }
+        body.unlocked .sortable-header:hover::after { background-color: #00e5ff; }
+        body.unlocked th.sortable-header:nth-child(3)::after, body.unlocked th.sortable-header:nth-child(4)::after, body.unlocked th.sortable-header:nth-child(5)::after { left: 50%; transform: translateX(-50%); }
+
+        .micro-switch-group { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.85em; color: #444; display: inline-block; margin-left: 8px; letter-spacing: 0; vertical-align: middle; }
+        body.unlocked .micro-switch-group { color: #555; }
+        .micro-switch { cursor: pointer; color: #00e5ff; transition: all 0.2s ease; position: relative; padding: 0 2px; }
+        .micro-switch.inactive { color: #444; cursor: default; } 
+        body.unlocked .micro-switch:not(.inactive):hover { color: #fff; text-shadow: 0 0 8px rgba(0, 229, 255, 0.8); }
+        body.unlocked .micro-switch.active-switch { color: #fff; text-shadow: 0 0 8px rgba(0, 229, 255, 0.8); font-weight: bold; }
+        body.unlocked .micro-switch:not(.inactive)::after { content: ''; position: absolute; left: 50%; bottom: -2px; transform: translateX(-50%); width: 0%; height: 1px; background-color: #fff; transition: width 0.2s ease; }
+        body.unlocked .micro-switch:not(.inactive):hover::after, body.unlocked .micro-switch.active-switch::after { width: 100%; }
+
+        .tgt-bar-container { width: 100px; height: 4px; background: #1a1a24; border-radius: 2px; margin: 6px auto 0 auto; position: relative; overflow: visible; }
+        .tgt-bar-container::before { content: ''; position: absolute; left: 50%; top: -2px; width: 2px; height: 8px; background-color: #555; z-index: 2; }
+        .tgt-bar-fill { position: absolute; height: 100%; border-radius: 2px; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .tgt-bar-fill.under { right: 50%; background: #00e676; box-shadow: 0 0 8px #00e676; transform-origin: right; }
+        .tgt-bar-fill.over { left: 50%; background: #ff5252; box-shadow: 0 0 8px #ff5252; transform-origin: left; }
+        .tgt-text { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.85em; color: #ccc; margin-top: 4px; display: block; }
+
+        tbody tr { transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease, box-shadow 0.3s ease; border-bottom: 1px solid #222; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { transform: translateX(2px); background-color: rgba(255, 255, 255, 0.02); box-shadow: inset 3px 0 0 #00e5ff, 0 4px 15px rgba(0, 229, 255, 0.05); }
+        th, td { padding: 20px 20px; vertical-align: top; line-height: 1.6; font-size: 0.82em; }
+        
+        .highlight { color: #00e676; font-weight: 500; font-family: 'Courier New', Courier, monospace;}
+        .warning { color: #ffb300; font-weight: 500; font-family: 'Courier New', Courier, monospace;}
+        .critical { color: #ff5252; font-weight: 500; font-family: 'Courier New', Courier, monospace;}
+        
+        .protocol-name { font-weight: 600; color: #fff; display: flex; align-items: center; margin-bottom: 4px; font-size: 1.15em; }
+        .ticker-val { font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; font-weight: 600; color: #e0e0e0; font-size: 1.15em; display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .ticker-usd { font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; font-size: 0.95em; color: #777; transition: color 0.3s ease; }
+        
+        .live-value-highlight { color: #dce6f2 !important; text-shadow: 0 0 10px rgba(220, 230, 242, 0.5); font-weight: 500; font-size: 0.95em; }
+        .historical-value { font-weight: 700; font-size: 0.95em; color: #888; }
+
+        #tickerTable th:nth-child(3), #tickerTable td:nth-child(3), #tickerTable th:nth-child(4), #tickerTable td:nth-child(4), #tickerTable th:nth-child(5), #tickerTable td:nth-child(5), #tickerTable th:nth-child(6), #tickerTable td:nth-child(6) { text-align: center; }
+        #tickerTable td:nth-child(3) .ticker-val, #tickerTable td:nth-child(4) .ticker-val { justify-content: center; }
+        
+        .date-badge { font-family: 'SFMono-Regular', Consolas, monospace; color: #555; font-size: 0.85em; margin-top: 4px; display: block; }
+        .qty-cell { font-family: 'SFMono-Regular', Consolas, monospace; color: #a0a0a0; font-size: 1.05em; font-weight: 500; }
+        
+        .crypto-icon, .protocol-icon { margin-right: 8px; transition: all 0.3s ease; object-fit: contain; }
+        .crypto-icon { width: 16px; height: 16px; filter: grayscale(100%) opacity(0.4); }
+        .protocol-icon { width: 18px; height: 18px; border-radius: 4px; filter: grayscale(100%) opacity(0.4); }
+        .crypto-icon.invert-logo { filter: invert(1) opacity(0.4); transform: scale(0.85); }
+        
+        tbody tr:hover .crypto-icon:not(.invert-logo) { filter: grayscale(0%) opacity(1) drop-shadow(0 0 6px rgba(255,255,255,0.3)); transform: scale(1.1); }
+        tbody tr:hover .crypto-icon.invert-logo { filter: invert(1) opacity(1) drop-shadow(0 0 6px rgba(255, 255, 255, 0.4)); transform: scale(1); }
+        tbody tr:hover .protocol-icon { filter: grayscale(0%) opacity(1); transform: scale(1.1); box-shadow: 0 0 8px rgba(255,255,255,0.2); }
+        
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; font-weight: 600; font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace; letter-spacing: 0.5px; margin-top: 2px; }
+        .badge.safe { background: rgba(79, 195, 247, 0.1); color: #4fc3f7; border: 1px solid rgba(79, 195, 247, 0.3); box-shadow: 0 0 10px rgba(79, 195, 247, 0.15); }
+        .badge.warning { background: rgba(255, 179, 0, 0.1); color: #ffb300; border: 1px solid rgba(255, 179, 0, 0.3); box-shadow: 0 0 10px rgba(255, 179, 0, 0.15); }
+        .badge.critical { background: rgba(255, 82, 82, 0.15); color: #ff5252; border: 1px solid rgba(255, 82, 82, 0.4); box-shadow: 0 0 15px rgba(255, 82, 82, 0.3); animation: pulseCriticalBadge 2s infinite; }
+        .badge.titanium { background: rgba(220, 230, 242, 0.08); color: #dce6f2; border: 1px solid rgba(220, 230, 242, 0.3); box-shadow: 0 0 10px rgba(220, 230, 242, 0.2); text-shadow: 0 0 4px rgba(220, 230, 242, 0.5); }
+        .badge.spento { background: rgba(255, 255, 255, 0.02); color: #777; border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: none; text-shadow: none; font-weight: 500; }
+        
+        .health-bar-container { width: 100%; height: 4px; background: #1a1a24; border-radius: 2px; margin-top: 8px; overflow: hidden; display: flex; justify-content: flex-start; }
+        .health-bar { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+        .health-bar.safe { background: #4fc3f7; box-shadow: 0 0 8px #4fc3f7; }
+        .health-bar.warning { background: #ffb300; box-shadow: 0 0 8px #ffb300; }
+        .health-bar.critical { background: #ff5252; box-shadow: 0 0 10px #ff5252; animation: pulseBar 1.5s infinite; }
+        
+        .footer-wrapper { margin-top: 60px; margin-bottom: 40px; }
+        .footer-note { padding: 30px; background: #111; border-left: 5px solid #2962ff; border-radius: 8px; font-size: 0.95em; color: #bbb; line-height: 1.7; margin-bottom: 20px; }
         .footer-note strong { color: #fff; display: block; margin-bottom: 10px; font-size: 1.1em; }
-        .due-diligence {
-            text-align: center;
-            font-size: 0.85em;
-            color: #666;
-            font-style: italic;
+        .due-diligence { text-align: center; font-size: 0.85em; color: #666; font-style: italic; }
+        
+        .slide-history { display: flex; flex-direction: column; height: 100%; padding: 16px 20px; box-sizing: border-box; min-height: 400px; }
+        .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;}
+        .history-title { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #666; text-transform: uppercase; }
+        .timeframe-btns { display: flex; gap: 4px; }
+        .tf-btn { background: transparent; border: 1px solid #222; color: #666; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; cursor: pointer; letter-spacing: 0.05em; transition: all 0.15s; }
+        .tf-btn:hover { border-color: #00e5ff; color: #00e5ff; }
+        .tf-btn.active { background: #00e5ff; border-color: #00e5ff; color: #000; }
+        .history-canvas-wrap { flex: 1; position: relative; min-height: 250px; }
+        #historyChart { width: 100% !important; height: 100% !important; }
+        .history-legend { display: flex; gap: 16px; margin-top: 8px; justify-content: center; flex-wrap:wrap;}
+        .hleg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #666; }
+        .hleg-dot { width: 10px; height: 3px; border-radius: 2px; }
+        .hleg-dot.val { background: #4ade80; }
+        .hleg-dot.inv { background: rgba(255,255,255,0.25); }
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 10px rgba(0, 230, 118, 0.2); }
+            50% { text-shadow: 0 0 25px rgba(0, 230, 118, 0.9), 0 0 10px rgba(0, 230, 118, 0.5); }
+            100% { text-shadow: 0 0 10px rgba(0, 230, 118, 0.2); }
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .live-pulse-text {
+            animation: pulseGlow 4s infinite ease-in-out !important;
         }
+        .reward-dot { width: 6px; height: 6px; background-color: #ffeb3b; border-radius: 50%; display: inline-block; margin-left: 6px; box-shadow: 0 0 6px rgba(255, 235, 59, 0.6); vertical-align: middle; }
+        
+        /* TERMINALE SEGRETO */
+        #adminModal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+        .modal-content { background: #0d0d0d; margin: 4% auto; padding: 30px; border: 1px solid #333; width: 90%; max-width: 500px; border-radius: 12px; box-shadow: 0 0 40px rgba(0, 229, 255, 0.15); color: #fff; max-height: 85vh; overflow-y: auto; font-family: 'Inter', sans-serif;}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; color: #00e5ff; font-size: 1.2em; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;}
+        .close-modal { color: #555; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.3s; }
+        .close-modal:hover { color: #ff5252; }
+        .admin-form-group { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 6px; border: 1px solid #1a1a24;}
+        .admin-form-group label { font-family: 'SFMono-Regular', Consolas, monospace; color: #aaa; font-size: 0.85em; }
+        .admin-form-group input { background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 1em; width: 140px; text-align: right; outline: none; transition: border 0.3s, box-shadow 0.3s; }
+        .admin-form-group input:focus { border-color: #00e5ff; box-shadow: inset 0 0 5px rgba(0, 229, 255, 0.2); }
+        .admin-btn { width: 100%; background: rgba(0, 229, 255, 0.05); border: 1px solid #00e5ff; color: #00e5ff; padding: 15px; font-weight: bold; letter-spacing: 2px; cursor: pointer; border-radius: 6px; margin-top: 25px; transition: all 0.3s; text-transform: uppercase;}
+        .admin-btn:hover { background: #00e5ff; color: #000; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
+        .admin-section-title { color: #666; font-size: 0.7em; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px dashed #222; padding-bottom: 5px;}
+        
+        @media (max-width: 768px) {
+    body { padding: 15px; }
+    .header { flex-direction: column; align-items: flex-start; }
+    .charts-wrapper { flex-direction: column; align-items: center; }
+    .chart-container { width: 100%; min-height: 350px; padding: 15px; box-sizing: border-box;}
+    .chart-layer { left: 10px; right: 10px; top: 70px; bottom: 10px;}
+    .slide { overflow-x: auto; }
+    table { min-width: 800px; }
+}
     </style>
 </head>
 <body>
 
+<div id="adminModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>TERMINALE OPERATIVO</h2>
+            <span class="close-modal" onclick="closeAdmin()">&times;</span>
+        </div>
+        <div id="adminForm">
+            </div>
+        <button class="admin-btn" onclick="saveAdminData()">Sincronizza Matrice</button>
+    </div>
+</div>
+
 <div class="container">
     <div class="header">
-        <h1>Architettura della Fortezza</h1>
-        <p style="color: #888;">Protocollo Operativo di Gestione e Analisi On-Chain | Flow Architect</p>
+        <div class="header-title">
+            <h1>Architettura della Fortezza</h1>
+            <p>Protocollo Operativo di Gestione e Analisi On-Chain | Flow Architect</p>
+        </div>
+       <div class="controls-wrapper">
+            <div id="forexDisplay" style="color: #666; font-size: 0.85em; font-family: monospace; display: flex; align-items: center; padding-right: 10px; border-right: 1px solid #333;">1€ = $1.080</div>
+            <button id="currencyBtn" class="market-btn">€</button>
+            <button id="marketBtn" class="market-btn">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="14" width="4" height="6" rx="1"></rect>
+                    <rect x="10" y="10" width="4" height="10" rx="1"></rect>
+                    <rect x="17" y="4" width="4" height="16" rx="1"></rect>
+                </svg>
+                Market View
+            </button>
+        </div>
+    </div>
+
+    <div id="viewModeLabel">
+        <div id="liveSignal" class="live-indicator"></div>
+        <span id="viewModeText">Visualizzazione attuale: <strong>Base di Costo (Punti Zero)</strong></span>
     </div>
 
     <div class="charts-wrapper">
         <div class="chart-container">
-            <h3>Asset Allocation Macro</h3>
-            <canvas id="macroChart"></canvas>
-            <div class="click-instruction">👆 Clicca sul segmento "Crypto" per l'analisi granulare</div>
+            <h3 style="position: relative; z-index: 10;">
+                Asset Allocation Macro
+                <span class="micro-switch-group">
+                    [<span class="micro-switch active-switch inactive" id="btn-macro-chart" onclick="switchMacroView('chart')">CHART</span>|<span class="micro-switch inactive" id="btn-macro-tgt" onclick="switchMacroView('tgt')">TGT</span>]
+                </span>
+            </h3>
+            
+            <div id="macroChartContainer" class="chart-layer">
+                <canvas id="macroChart"></canvas>
+            </div>
+            
+            <div id="macroTgtWrapper" class="chart-layer">
+                <div class="macro-tgt-row">
+                    <div class="macro-tgt-header">
+                        <span class="macro-tgt-title" style="color: #3a7bd5;">La Roccia (ETF)</span>
+                        <span class="macro-tgt-numbers" id="macro-tgt-etf-num">--% / 33.33%</span>
+                    </div>
+                    <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-etf-bar"></div></div>
+                </div>
+                <div class="macro-tgt-row">
+                    <div class="macro-tgt-header">
+                        <span class="macro-tgt-title" style="color: #78788c;">Paracadute (Liquidità)</span>
+                        <span class="macro-tgt-numbers" id="macro-tgt-liq-num">--% / 33.33%</span>
+                    </div>
+                    <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-liq-bar"></div></div>
+                </div>
+                <div class="macro-tgt-row">
+                    <div class="macro-tgt-header">
+                        <span class="macro-tgt-title" style="color: #ffb74d;">Big Cap (Crypto)</span>
+                        <span class="macro-tgt-numbers" id="macro-tgt-crypto-num">--% / 33.33%</span>
+                    </div>
+                    <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-crypto-bar"></div></div>
+                </div>
+            </div>
+            
+            <div class="tgt-legend-wrapper">
+                <div class="legend-dot-under"></div>
+                <span class="legend-text" style="margin-right: 10px;">Under Target</span>
+                <div class="legend-dot-over"></div>
+                <span class="legend-text">Over Target</span>
+            </div>
+
         </div>
-        <div class="chart-container" id="cryptoDetailContainer">
-            <h3>Scomposizione Big Cap</h3>
-            <canvas id="cryptoChart"></canvas>
+        
+        <div class="chart-container" id="detailChartContainer">
+            <h3 id="detailChartTitle">Terminale in Attesa...</h3>
+            <canvas id="detailChart"></canvas>
         </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 20%;">Protocollo / Asset</th>
-                <th style="width: 20%;">Capitale & Net Value</th>
-                <th style="width: 20%;">Performance & Rischio</th>
-                <th style="width: 40%;">Outlook Operativo (Flow Architect)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><span class="protocol-name">Loopscale</span> jupSOL (Posizione 1)<br><span class="sub-text">Leva 6,1x</span></td>
-                <td><strong>3,00 jupSOL</strong><br><span class="sub-text">Net Value: $301,98</span><br><span class="date-badge">Apertura Recente</span></td>
-                <td><span class="highlight">+0,06 jupSOL (Yield)</span><br><span class="safe">10,17% APY Netto</span><br><span class="warning">11,88% Health</span></td>
-                <td>Gestione chirurgica del collaterale. Strategia di accumulo yield ottimizzata su Solana con monitoraggio millimetrico del peg e della solvibilità dello smart contract.</td>
-            </tr>
-            <tr>
-                <td><span class="protocol-name">Loopscale</span> jupSOL (Posizione 2)<br><span class="sub-text">Leva 7,0x</span></td>
-                <td><strong>2,49 jupSOL</strong><br><span class="sub-text">Net Value: $250,37</span><br><span class="date-badge">Apertura: 25/02/2026</span></td>
-                <td><span class="highlight">+0,07 jupSOL (Yield)</span><br><span class="safe">10,70% APY Netto</span><br><span class="warning">9,87% Health</span></td>
-                <td>Saturazione dell'efficienza del capitale tramite leva calcolata. Posizionamento tattico per massimizzare il ritorno sul capitale nel breve periodo.</td>
-            </tr>
-            <tr>
-                <td><span class="protocol-name">Loopscale</span> stkESOL<br><span class="sub-text">Leva 9,7x</span></td>
-                <td><strong>10,91 stkESOL</strong><br><span class="sub-text">Net Value: $946,75</span><br><span class="date-badge">Apertura Recente</span></td>
-                <td><span class="highlight">+0,362 stkESOL (Yield)</span><br><span class="safe">25,24% APY Netto</span><br><span class="critical">5,56% Health</span></td>
-                <td>Posizione aggressiva mirata all'accumulo massivo di rewards. Rischio di de-peg monitorato in tempo reale.</td>
-            </tr>
-            <tr>
-                <td><span class="protocol-name">Defi Carrot</span> ONyc (RWA)<br><span class="sub-text">Leva 3,4x</span></td>
-                <td><strong>$1.063,67 (984,92 ONyc)</strong><br><span class="sub-text">Net Value: $1.056,71</span><br><span class="date-badge">Apertura: 18/02/2026</span></td>
-                <td><span class="safe">Posizione Gestita</span><br><span class="warning">Fee: 1,277 ONyc</span></td>
-                <td>Esposizione tattica sui Real World Assets. Delta in ingresso di ~$5 restituito dal protocollo e tracciato chirurgicamente come residuo a wallet.<br>
-                <a href="https://x.com/alex_lamports/status/2028298584081289660?s=20" target="_blank" class="x-button">𝕏 Leggi l'Analisi Forense On-Chain</a>
-                </td>
-            </tr>
-            <tr>
-                <td><span class="protocol-name">Kamino Finance</span> USDG/PYUSD<br><span class="sub-text">Leva 9,1x (Multiply)</span></td>
-                <td><strong>$2.361,20</strong><br><span class="sub-text">Net Value: $2.353,62</span><br><span class="date-badge">Apertura Recente</span></td>
-                <td><span class="safe">13,89% APY Netto</span><br><span class="safe">88,96% LTV</span></td>
-                <td>Yield farming su stable-loop (USDG/PYUSD) per annullare il rischio volatilità. LTV in zona di massima sicurezza (Safe) grazie al peg. Delta di ~$7 in ingresso allocato e tracciato come residuo tecnico a wallet.</td>
-            </tr>
-            <tr>
-                <td><span class="protocol-name">Jupiter Lend</span> EURC<br><span class="sub-text">Liquidità Nativa</span></td>
-                <td><strong>1.453,20 EURC</strong><br><span class="sub-text">Valore Nativo</span><br><span class="date-badge">Riserva</span></td>
-                <td><span class="highlight">+0,86 EURC (Yield)</span><br><span class="safe">2,85% APY Netto</span></td>
-                <td>Riserva Strategica di Collaterale pronta per interventi rapidi a copertura delle posizioni a leva o per ingressi tattici sul mercato.</td>
-            </tr>
-            <tr>
-                <td><span class="protocol-name">Sail Money (AI Agent)</span> EURC<br><span class="sub-text">Automazione Fluid/Gauntlet</span></td>
-                <td><strong>€1.451,74</strong><br><span class="sub-text">Net Value: €1.451,87</span><br><span class="date-badge">Dal 18/02/2026</span></td>
-                <td>
-                    <div class="tooltip-container">
-                        <span class="safe" style="border-bottom: 1px dotted #4fc3f7;">20,00% APY Netto ℹ️</span>
-                        <div class="tooltip-text">
-                            <span style="color: #aaa; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">Yield Attribution Analysis</span><br><br>
-                            Euro APY (Nativo): <span class="tooltip-value">1,83%</span><br>
-                            Points APY (Rewards): <span class="tooltip-value highlight">18,17%</span>
-                        </div>
-                    </div>
-                    <br><span class="safe">100% Liquid</span>
-                </td>
-                <td>Sperimentazione attiva dell'automazione on-chain. L'agente IA ribilancia dinamicamente (attualmente 58,68% Fluid / 41,32% Gauntlet), abbattendo il carico cognitivo del micro-management sulle stablecoin.</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-control-bar">
+        <div class="table-title-group">
+            <h3 class="table-title" id="dynamicTableTitle">Portfolio History</h3>
+            <div class="legend-wrapper" id="dynamicSubtitle" style="transition: opacity 0.2s ease;">
+                <span class="legend-text">Analisi Forense | Net Fiat vs PnL Globale</span>
+            </div>
+        </div>
 
+        <button id="privacyBtn" class="privacy-toggle-cupo">
+            <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+            </svg>
+            <span id="privacyText">PRIVACY OFF</span>
+        </button>
+    </div>
+
+    <div class="slider-wrapper" id="sliderWrapper">
+        <div class="slider-track">
+
+            <div class="slide slide-history">
+              <div class="history-header" style="align-items: flex-start;">
+                <div>
+                    <span class="history-title">Portfolio History</span>
+                    <div id="chartHeroMetric" class="sensitive-data" style="opacity: 0; transition: opacity 0.8s ease; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 1.8em; font-weight: 700; margin-top: 4px; letter-spacing: -0.5px;">--</div>
+                    <div id="chartHeroSub" class="sensitive-data" style="opacity: 0; transition: opacity 0.8s ease; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.75em; color: #aaa; margin-top: 6px; letter-spacing: 0.5px; display: none;">--</div>
+                </div>
+                <div class="timeframe-btns" style="margin-top: 4px;">
+                  <button class="tf-btn" data-tf="1M">1M</button>
+                  <button class="tf-btn" data-tf="3M">3M</button>
+                  <button class="tf-btn" data-tf="1Y">1Y</button>
+                  <button class="tf-btn active" data-tf="ALL">ALL</button>
+                </div>
+              </div>
+              <div class="history-canvas-wrap">
+                <canvas id="historyChart"></canvas>
+              </div>
+              <div class="history-legend">
+                <div class="hleg-item"><div class="hleg-dot val"></div><span>Market Value</span></div>
+                <div class="hleg-item"><div class="hleg-dot inv"></div><span>Invested Capital</span></div>
+              </div>
+            </div>
+            
+            <div class="slide" id="slide-ticker">
+                <table id="tickerTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" onclick="handleSort('asset')" style="width: 19%;">Asset</th>
+                            <th style="width: 11%;">Quantità</th>
+                            <th class="sortable-header" onclick="handleSort('price')" style="width: 20%;">Prezzo (Live / BE)</th>
+                            <th class="sortable-header" onclick="handleSort('24h')" style="width: 14%;">24H (%)</th>
+                            <th class="sortable-header" onclick="handleSort('capital')" style="width: 18%;">Capitale (Valore / Speso)</th>
+                            <th style="width: 18%; text-align: center;">
+                                PnL & Status <br>
+                                <span class="micro-switch-group">
+                                    [<span class="micro-switch inactive" id="btn-val" onclick="switchView('pnl_val')">VAL</span>|<span class="micro-switch active-switch inactive" id="btn-pct" onclick="switchView('pnl_pct')">%</span>|<span class="micro-switch inactive" id="btn-tgt" onclick="switchView('tgt')">TGT</span>]
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tickerBody">
+                        <tr data-id="bitcoin">
+                            <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/1/standard/bitcoin.png" class="crypto-icon"> Bitcoin (BTC)</div></td>
+                            <td><div class="qty-cell" id="qty-bitcoin">--</div></td>
+                            <td><div class="ticker-val" id="price-bitcoin">--</div></td>
+                            <td><div class="ticker-val" id="change-bitcoin">--</div></td>
+                            <td><div class="ticker-usd" id="val-bitcoin">--</div></td>
+                            <td id="col6-bitcoin"><span class="badge" id="status-bitcoin">In attesa...</span></td>
+                        </tr>
+                        <tr data-id="ethereum">
+                            <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/279/standard/ethereum.png" class="crypto-icon"> Ethereum (ETH)</div></td>
+                            <td><div class="qty-cell" id="qty-ethereum">--</div></td>
+                            <td><div class="ticker-val" id="price-ethereum">--</div></td>
+                            <td><div class="ticker-val" id="change-ethereum">--</div></td>
+                            <td><div class="ticker-usd" id="val-ethereum">--</div></td>
+                            <td id="col6-ethereum"><span class="badge" id="status-ethereum">In attesa...</span></td>
+                        </tr>
+                        <tr data-id="solana">
+                            <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/4128/standard/solana.png" class="crypto-icon"> Solana (SOL)</div></td>
+                            <td><div class="qty-cell" id="qty-solana">--</div></td>
+                            <td><div class="ticker-val" id="price-solana">--</div></td>
+                            <td><div class="ticker-val" id="change-solana">--</div></td>
+                            <td><div class="ticker-usd" id="val-solana">--</div></td>
+                            <td id="col6-solana"><span class="badge" id="status-solana">In attesa...</span></td>
+                        </tr>
+                        <tr data-id="binancecoin">
+                            <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png" class="crypto-icon"> Binance Coin (BNB)</div></td>
+                            <td><div class="qty-cell" id="qty-binancecoin">--</div></td>
+                            <td><div class="ticker-val" id="price-binancecoin">--</div></td>
+                            <td><div class="ticker-val" id="change-binancecoin">--</div></td>
+                            <td><div class="ticker-usd" id="val-binancecoin">--</div></td>
+                            <td id="col6-binancecoin"><span class="badge" id="status-binancecoin">In attesa...</span></td>
+                        </tr>
+                        <tr data-id="bittensor">
+                            <td><div class="protocol-name"><div class="crypto-icon" style="width: 16px; height: 16px; border-radius: 50%; background-image: url('https://assets.coingecko.com/coins/images/28452/standard/ARUsPeNQ_400x400.jpeg'); background-size: 200%; background-position: center; flex-shrink: 0;"></div> Bittensor (TAO)</div></td>
+                            <td><div class="qty-cell" id="qty-bittensor">--</div></td>
+                            <td><div class="ticker-val" id="price-bittensor">--</div></td>
+                            <td><div class="ticker-val" id="change-bittensor">--</div></td>
+                            <td><div class="ticker-usd" id="val-bittensor">--</div></td>
+                            <td id="col6-bittensor"><span class="badge" id="status-bittensor">In attesa...</span></td>
+                        </tr>
+                       <tr data-id="ondo-finance">
+    <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" class="crypto-icon invert-logo"> Ondo Finance (RWA)</div></td>
+    <td><div class="qty-cell" id="qty-ondo-finance">--</div></td>
+    <td><div class="ticker-val" id="price-ondo-finance">--</div></td>
+    <td><div class="ticker-val" id="change-ondo-finance">--</div></td>
+    <td><div class="ticker-usd" id="val-ondo-finance">--</div></td>
+    <td id="col6-ondo-finance"><span class="badge" id="status-ondo-finance">In attesa...</span></td>
+</tr>
+                        <tr data-id="low-cap-index">
+                            <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #b0bec5;"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> Low Cap Index</div></td>
+                            <td><div class="qty-cell" id="qty-low-cap-index">--</div></td>
+                            <td><div class="ticker-val" id="price-low-cap-index">--</div></td>
+                            <td><div class="ticker-val" id="change-low-cap-index">--</div></td>
+                            <td><div class="ticker-usd" id="val-low-cap-index">--</div></td>
+                            <td id="col6-low-cap-index"><span class="badge" id="status-low-cap-index">In attesa...</span></td>
+                        </tr>
+                        <tr data-id="msci-world">
+                            <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #4fc3f7;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> La Roccia (EUNL)</div></td>
+                            <td><div class="qty-cell" id="qty-msci-world">--</div></td>
+                            <td><div class="ticker-val" id="price-msci-world">--</div></td>
+                            <td><div class="ticker-val" id="change-msci-world">--</div></td>
+                            <td><div class="ticker-usd" id="val-msci-world">--</div></td>
+                            <td id="col6-msci-world"><span class="badge" id="status-msci-world">In attesa...</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+           <div class="slide" id="slide-defi">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Protocollo</th>
+                            <th style="width: 20%;">Ticker & Capitale</th>
+                            <th style="width: 20%;">Performance & Rischio</th>
+                            <th style="width: 40%;">Outlook Operativo (Flow Architect)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="protocol-name">
+                                    <svg class="protocol-icon" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#276ED6"/><path d="M93.5739 245.771L121.04 208.7C122.819 206.3 126.59 207.298 126.986 210.268C135.366 273.188 220.801 295.712 258.759 242.952L345.703 125.6C347.032 123.81 349.87 124.745 349.87 126.978V195.672C349.87 198.523 348.952 201.303 347.253 203.591L298.566 269.189C247.618 342.509 133.99 334.827 92.7041 256.811C90.8382 253.279 91.1942 248.986 93.5739 245.771Z" fill="#DBDEF7"/><path d="M305.398 154.289L277.774 191.566C275.995 193.966 272.23 192.968 271.828 190.006C263.375 127.315 178.4 104.76 140.307 157.116L91.4311 222.975L54.3034 273.573C52.9831 275.379 50.1289 274.437 50.1289 272.204V203.089C50.1289 200.238 51.046 197.466 52.738 195.178L97.4556 134.831C145.731 57.2191 264.956 63.7607 306.299 143.305C308.133 146.829 307.762 151.098 305.398 154.289Z" fill="#DBDEF7"/></svg>
+                                    Loopscale
+                                </div>
+                                <span class="date-badge">26/02/2026 - 00:46</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/jupsol.png" class="crypto-icon" onerror="this.src='https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png'"> <span class="sensitive-data">11.78</span> JupSOL <div class="reward-dot"></div></div>
+                                <div class="ticker-usd" data-cg-id="jup-solana" data-qty="11.78">Net Value: $ <span class="sensitive-data">1,266.33</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.08</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">83.4%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">6.20x</span>)</span></div>
+                                <div style="margin-top: 6px;">Health: <span class="badge safe">12.22%</span></div>
+                                <div class="health-bar-container"><div class="health-bar safe" style="width: 24.44%"></div></div> 
+                            </td>
+                            <td>Gestione chirurgica del collaterale. Strategia di accumulo yield ottimizzata su Solana con monitoraggio millimetrico del peg e della solvibilità dello smart contract.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name">
+                                    <svg class="protocol-icon" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#276ED6"/><path d="M93.5739 245.771L121.04 208.7C122.819 206.3 126.59 207.298 126.986 210.268C135.366 273.188 220.801 295.712 258.759 242.952L345.703 125.6C347.032 123.81 349.87 124.745 349.87 126.978V195.672C349.87 198.523 348.952 201.303 347.253 203.591L298.566 269.189C247.618 342.509 133.99 334.827 92.7041 256.811C90.8382 253.279 91.1942 248.986 93.5739 245.771Z" fill="#DBDEF7"/><path d="M305.398 154.289L277.774 191.566C275.995 193.966 272.23 192.968 271.828 190.006C263.375 127.315 178.4 104.76 140.307 157.116L91.4311 222.975L54.3034 273.573C52.9831 275.379 50.1289 274.437 50.1289 272.204V203.089C50.1289 200.238 51.046 197.466 52.738 195.178L97.4556 134.831C145.731 57.2191 264.956 63.7607 306.299 143.305C308.133 146.829 307.762 151.098 305.398 154.289Z" fill="#DBDEF7"/></svg>
+                                    Loopscale
+                                </div>
+                                <span class="date-badge">25/02/2026 - 21:12</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/jupsol.png" class="crypto-icon" onerror="this.src='https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png'"> <span class="sensitive-data">9.75</span> JupSOL <div class="reward-dot"></div></div>
+                                <div class="ticker-usd" data-cg-id="jup-solana" data-qty="9.75">Net Value: $ <span class="sensitive-data">1,044.85</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.04</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">85.2%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">7.10x</span>)</span></div>
+                                <div style="margin-top: 6px;">Health: <span class="badge warning">10.31%</span></div>
+                                <div class="health-bar-container"><div class="health-bar warning" style="width: 20.62%"></div></div> 
+                            </td>
+                            <td>Saturazione dell'efficienza del capitale tramite leva calcolata. Posizionamento tattico per massimizzare il ritorno sul capitale nel breve periodo.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name">
+                                    <svg class="protocol-icon" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#276ED6"/><path d="M93.5739 245.771L121.04 208.7C122.819 206.3 126.59 207.298 126.986 210.268C135.366 273.188 220.801 295.712 258.759 242.952L345.703 125.6C347.032 123.81 349.87 124.745 349.87 126.978V195.672C349.87 198.523 348.952 201.303 347.253 203.591L298.566 269.189C247.618 342.509 133.99 334.827 92.7041 256.811C90.8382 253.279 91.1942 248.986 93.5739 245.771Z" fill="#DBDEF7"/><path d="M305.398 154.289L277.774 191.566C275.995 193.966 272.23 192.968 271.828 190.006C263.375 127.315 178.4 104.76 140.307 157.116L91.4311 222.975L54.3034 273.573C52.9831 275.379 50.1289 274.437 50.1289 272.204V203.089C50.1289 200.238 51.046 197.466 52.738 195.178L97.4556 134.831C145.731 57.2191 264.956 63.7607 306.299 143.305C308.133 146.829 307.762 151.098 305.398 154.289Z" fill="#DBDEF7"/></svg>
+                                    Loopscale
+                                </div>
+                                <span class="date-badge">26/02/2026 - 03:52</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/stksol.png" class="crypto-icon" onerror="this.src='https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png'"> <span class="sensitive-data">42.67</span> STKESOL <div class="reward-dot"></div></div>
+                                <div class="ticker-usd" data-cg-id="jup-solana" data-qty="42.67">Net Value: $ <span class="sensitive-data">4,023.08</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.12</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="critical">89.5%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">10.01x</span>)</span></div>
+                                <div style="margin-top: 6px;">Health: <span class="badge critical">5.73%</span></div>
+                                <div class="health-bar-container"><div class="health-bar critical" style="width: 11.46%"></div></div> 
+                            </td>
+                            <td>Posizione aggressiva mirata all'accumulo massivo di rewards. Rischio di de-peg monitorato in tempo reale.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name">
+                                    <svg class="protocol-icon" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#276ED6"/><path d="M93.5739 245.771L121.04 208.7C122.819 206.3 126.59 207.298 126.986 210.268C135.366 273.188 220.801 295.712 258.759 242.952L345.703 125.6C347.032 123.81 349.87 124.745 349.87 126.978V195.672C349.87 198.523 348.952 201.303 347.253 203.591L298.566 269.189C247.618 342.509 133.99 334.827 92.7041 256.811C90.8382 253.279 91.1942 248.986 93.5739 245.771Z" fill="#DBDEF7"/><path d="M305.398 154.289L277.774 191.566C275.995 193.966 272.23 192.968 271.828 190.006C263.375 127.315 178.4 104.76 140.307 157.116L91.4311 222.975L54.3034 273.573C52.9831 275.379 50.1289 274.437 50.1289 272.204V203.089C50.1289 200.238 51.046 197.466 52.738 195.178L97.4556 134.831C145.731 57.2191 264.956 63.7607 306.299 143.305C308.133 146.829 307.762 151.098 305.398 154.289Z" fill="#DBDEF7"/></svg>
+                                    Loopscale
+                                </div>
+                                <span class="date-badge">26/02/2026 - 10:15</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/onyc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png'"> <span class="sensitive-data">4,251.70</span> ONyc <div class="reward-dot"></div></div>
+                                <div class="ticker-usd" data-cg-id="ondo-finance" data-qty="4,251.70">Net Value: $ <span class="sensitive-data">4,598.64</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="safe">0.00</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="safe">68.5%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">3.90x</span>)</span></div>
+                                <div style="margin-top: 6px;">Health: <span class="badge safe">19.20%</span></div>
+                                <div class="health-bar-container"><div class="health-bar safe" style="width: 38.40%"></div></div> 
+                            </td>
+                            <td>RWA in collaterale per estrazione liquidità. Ancorato per ottimizzare l'efficienza senza esposizione alla volatilità.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name"><img src="img/carrot.png" class="protocol-icon"> Defi Carrot</div>
+                                <span class="date-badge">26/02/2026 - 00:47</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/onyc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/34440/standard/ondo_logo_blue_1_%281%29.png'"> <span class="sensitive-data">3,841.19</span> ONyc <div class="reward-dot"></div></div>
+                                <div class="ticker-usd" data-cg-id="ondo-finance" data-qty="3841.19">Net Value: $ <span class="sensitive-data">4,121.17</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="safe">0.00</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="safe">70.8%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">3.42x</span>)</span></div>
+                                <div style="margin-top: 6px;">Health: <span class="badge safe">18.00%</span></div>
+                                <div class="health-bar-container"><div class="health-bar safe" style="width: 36.00%"></div></div>
+                            </td>
+                            <td>
+                                Esposizione tattica sui Real World Assets. Accumulo attivo (Season 3).<br>
+                                <a href="https://x.com/alex_lamports/status/2028298584081289660?s=20" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px 12px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-decoration: none; font-size: 0.85em; font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.boxShadow='0 0 12px rgba(255,255,255,0.4)'; this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='none'; this.style.background='rgba(255, 255, 255, 0.05)'; this.style.transform='translateY(0)';">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    Analisi Forense On-Chain
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name"><img src="img/kamino.png" class="protocol-icon"> Kamino Finance</div>
+                                <span class="date-badge">26/02/2026 - 11:34</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/usdg.png" class="crypto-icon" style="border-radius: 50%;" onerror="this.src='https://api.kamino.finance/kvaults/mints/2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH/metadata/image.svg'"> <span class="sensitive-data">4,595.88</span> USDG <div class="reward-dot"></div></div>
+                                <div class="ticker-usd">Net Value: $ <span class="sensitive-data">4,595.88</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="critical">-3.98</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">88.9%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">9.03x</span>)</span></div>
+                                <div style="margin-top: 6px;">Health: <span class="badge warning">10.60%</span></div>
+                                <div class="health-bar-container"><div class="health-bar warning" style="width: 21.20%"></div></div>
+                            </td>
+                            <td>Yield farming su stable-loop per annullare il rischio volatilità. LTV in zona sicura grazie al peg valutario.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/34188/standard/jup.png" class="protocol-icon"> Jupiter Lend</div>
+                                <span class="date-badge">23/02/2026 - 13:53</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/eurc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/26040/standard/EURC.png'"> <span class="sensitive-data">5,667.95</span> EURC</div>
+                                <div class="ticker-usd">Liquidità Nativa</div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+3.86</span></div>
+                                <div style="margin-top: 8px;">Stato: <span class="badge safe">Safe (Paracadute)</span></div>
+                            </td>
+                            <td>Riserva Strategica di Collaterale pronta per interventi rapidi on-chain.</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="protocol-name"><img src="https://sail.money/Logo_white.png" class="protocol-icon"> Sail Money</div>
+                                <span class="date-badge">24/02/2026 - 12:51</span>
+                            </td>
+                            <td>
+                                <div class="ticker-val"><img src="img/eurc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/26040/standard/EURC.png'"> <span class="sensitive-data">5,662.41</span> EURC <div class="reward-dot"></div></div>
+                                <div class="ticker-usd">Net Value: € <span class="sensitive-data">5,662.29</span></div>
+                            </td>
+                            <td>
+                                <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.62</span></div>
+                                <div style="margin-top: 8px;">Stato: <span class="badge safe">Safe (AI Agent)</span></div>
+                            </td>
+                            <td>Sperimentazione attiva dell'automazione on-chain. L'agente IA ribilancia dinamicamente in cerca del best yield.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="slider-dots">
+        <div class="dot active" id="dot0"></div>
+        <div class="dot" id="dot1"></div>
+        <div class="dot" id="dot2"></div>
+    </div>
     <div class="footer-wrapper">
         <div class="footer-note">
             <strong>Nota dell'Architetto</strong>
-            L'estrazione quantitativa del dato è solo metà del lavoro. Questa architettura è costruita seguendo i principi della <em>Neuro-Etica della Sensibilità</em>: il monitoraggio forense dei flussi non è solo numerico, ma serve a decodificare la matrice comportamentale che muove i capitali on-chain.<br><br> Questo ecosistema è il risultato di una collaborazione simbiotica di tre settimane con un'intelligenza artificiale avanzata e l'integrazione parallela di altri due modelli analitici (struttura multi-agente). Questa sinergia ha permesso di scalare rapidamente la gestione del rischio e l'ottimizzazione on-chain, trasformando la complessità dei dati in una strategia operativa coerente e trasparente.
+            L'estrazione quantitativa del dato è solo metà del lavoro. Questa architettura è costruita seguendo i principi della <em>Neuro-Etica della Sensibilità</em>: il monitoraggio forense dei flussi non è solo numerico, ma serve a decodificare la matrice comportamentale che muove i capitali on-chain.
         </div>
         <div class="due-diligence">
-            * On-Chain Verification and Wallet Address details are strictly maintained under secure OpSec protocols and available exclusively upon request for professional due diligence.
+            * On-Chain Verification and Wallet Address details are strictly maintained under secure OpSec protocols.<br>
+            <a href="https://x.com/alex_lamports" target="_blank" style="color: #00e5ff; text-decoration: none; margin-top: 8px; display: inline-block; border: 1px solid rgba(0, 229, 255, 0.3); padding: 4px 12px; border-radius: 4px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(0, 229, 255, 0.1)'" onmouseout="this.style.background='transparent'">📡 Segui l'Architetto su X (Twitter)</a>
         </div>
     </div>
 </div>
 
 <script>
-    Chart.defaults.color = '#888';
-    Chart.defaults.font.family = "'Inter', sans-serif";
+    let currentCurrency = 'eur';
+    let isMarketView = false;
+    let isLiveConnected = false;
+    let livePrices = { eur: {}, usd: {} };
+    let exchangeRateEurUsd = 1.08; 
+
+    // Variabili Memoria di Stato
+    let currentSortColumn = null;
+    let currentSortOrder = 'desc';
+    let currentViewMode = 'pnl_pct'; 
+
+// ATTENZIONE: IL KONAMI CODE (SU SU GIU GIU)
+let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+            openAdmin(); // Apre il terminale segreto
+            konamiIndex = 0; // Resetta per la prossima volta
+        }
+    } else {
+        konamiIndex = 0; // Se sbagli tasto, si resetta
+    }
+});
+
+async function initLiveEngine() {
+const ids = 'bitcoin,ethereum,solana,binancecoin,bittensor,ondo-finance,jup-solana,tether,chaingpt,jupiter-exchange-solana,realio-network,spx6900';
+    // Modifica Sicurezza: Uso API pubblica senza chiave esposta
+    const cryptoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`;
     
+    // ==========================================
+    // MOTORE 1: CRYPTO (Indipendente)
+    // ==========================================
+    try {
+        const res = await fetch(cryptoUrl);
+        if (res.status === 429) throw new Error("CoinGecko Limite Raggiunto (Pausa)");
+        if (!res.ok) throw new Error(`Errore Server: ${res.status}`);
+
+        const data = await res.json();
+        if (!data.bitcoin) throw new Error("Dati vuoti");
+
+        livePrices = Object.assign(livePrices, data); 
+        
+        if(data.tether && data.tether.eur) {
+            exchangeRateEurUsd = 1 / data.tether.eur;
+            isLiveConnected = true;
+            document.getElementById('liveSignal').style.display = 'block'; 
+            document.getElementById('liveSignal').style.backgroundColor = "#00e676"; 
+            updateForexDisplay();
+        }
+        console.log("✅ Motore Crypto: Online");
+    } catch (err) {
+        console.warn("🟡 Motore Crypto Offline/In Pausa:", err.message);
+        document.getElementById('liveSignal').style.backgroundColor = "orange";
+    }
+
+   // ==========================================
+    // MOTORE 2: TRADFI - ETF (Doppio Proxy e Ancora Forense)
+    // ==========================================
+    try {
+        let etfRes;
+        try {
+            // Tentativo 1: AllOrigins (Nuovo Proxy Primario)
+            etfRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE')}`);
+            if (!etfRes.ok) throw new Error("AllOrigins proxy down");
+        } catch (e1) {
+            // Tentativo 2: Corsproxy (Fallback)
+            etfRes = await fetch(`https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE`);
+            if (!etfRes.ok) throw new Error("Corsproxy down");
+        }
+        
+        const yahooData = await etfRes.json(); 
+        
+        if (yahooData && yahooData.chart && yahooData.chart.result && yahooData.chart.result[0]) {
+            const meta = yahooData.chart.result[0].meta;
+            const liveEtfPrice = meta.regularMarketPrice;
+            const prevClose = meta.chartPreviousClose; 
+            
+            let etf24hChange = 0;
+            if (prevClose) {
+                etf24hChange = ((liveEtfPrice - prevClose) / prevClose) * 100;
+            }
+
+            livePrices['msci-world'] = { 
+                eur: liveEtfPrice,
+                eur_24h_change: etf24hChange,
+                usd_24h_change: etf24hChange
+            };
+            console.log(`✅ Motore ETF: Agganciato a Xetra (${liveEtfPrice} € | 24H: ${etf24hChange.toFixed(2)}%)`);
+        } else {
+            throw new Error("Dati Yahoo illeggibili");
+        }
+    } catch (etfErr) {
+        console.warn("🟡 Motore ETF Offline: Uso il MANUAL_ETF_PRICE del Config.", etfErr.message);
+        // SCUDO FORENSE: Usa il prezzo dettato dall'Architetto nel CONFIG
+        livePrices['msci-world'] = {
+            eur: CONFIG.MANUAL_ETF_PRICE, 
+            eur_24h_change: 0,
+            usd_24h_change: 0
+        };
+    }
+
+    calculateDynamicData(); 
+}
+
+    let dataMacroBase = []; let dataMacroMarket = [];
+    let dataCryptoBase = []; let dataCryptoMarket = [];
+    let currentTotalCryptoValue = 0; // Per calcolo TGT Crypto
+
+function calculateDynamicData() {
+    const p = CONFIG.PORTFOLIO;
+    const cur = currentCurrency;
+    const sym = cur === 'usd' ? '$' : '€';
+
+    const getBaseVal = (asset) => p.crypto[asset].qty * p.crypto[asset].basePriceEur;
+
+    // --- 1. CALCOLO BASE (Punti Zero + Minusvalenza Parcl) ---
+    let btcBase = getBaseVal('bitcoin');
+    let ethBase = getBaseVal('ethereum');
+    let solBase = getBaseVal('solana');
+    let bnbBase = getBaseVal('binancecoin');
+    let taoBase = getBaseVal('bittensor');
+    let ondoBase = getBaseVal('ondo-finance');
+
+    let indexBaseEur = p.crypto["low-cap-index"].deadCapitalEur; 
+    for (const [coin, d] of Object.entries(p.crypto["low-cap-index"].assets)) {
+        indexBaseEur += d.qty * d.basePriceEur;
+    }
+
+    let totalCryptoBaseEur = btcBase + ethBase + solBase + bnbBase + taoBase + ondoBase + indexBaseEur;
+    let etfBaseEur = p.etf['msci-world'].qty * p.etf['msci-world'].basePriceEur;
+    
+    // Calcolo Base Liquidità (EURC + USDC al prezzo di carico)
+    let usdcBaseEur = p.liquidity.usdc.qty * p.liquidity.usdc.basePriceEur;
+    let liqBaseEur = p.liquidity.eurc + usdcBaseEur;
+
+    // --- 2. CALCOLO LIVE (API Sync) ---
+    const getLiveVal = (asset) => {
+        if(!isLiveConnected || !livePrices[asset]) return getBaseVal(asset);
+        return p.crypto[asset].qty * livePrices[asset][cur];
+    };
+
+    let btcLive = getLiveVal('bitcoin');
+    let ethLive = getLiveVal('ethereum');
+    let solLive = getLiveVal('solana');
+    let bnbLive = getLiveVal('binancecoin');
+    let taoLive = getLiveVal('bittensor');
+    let ondoLive = getLiveVal('ondo-finance');
+
+    let indexLive = 0;
+    let indexYesterday = 0;
+    for (const [coin, d] of Object.entries(p.crypto["low-cap-index"].assets)) {
+        if (isLiveConnected && livePrices[coin] && livePrices[coin].eur) {
+            let price = cur === 'usd' ? (livePrices[coin].usd || livePrices[coin].eur * exchangeRateEurUsd) : livePrices[coin].eur;
+            let val = d.qty * price;
+            indexLive += val;
+            let chg = livePrices[coin][`${cur}_24h_change`] || 0;
+            indexYesterday += val / (1 + chg/100);
+        } else {
+            indexLive += d.qty * (cur === 'usd' ? d.basePriceEur * exchangeRateEurUsd : d.basePriceEur);
+        }
+    }
+
+    p.crypto["low-cap-index"].computedBaseEur = indexBaseEur;
+    p.crypto["low-cap-index"].computedLive = indexLive;
+    p.crypto["low-cap-index"].computedChange = indexYesterday > 0 ? ((indexLive - indexYesterday)/indexYesterday)*100 : 0;
+
+    let totalCryptoLive = btcLive + ethLive + solLive + bnbLive + taoLive + ondoLive + indexLive;
+    currentTotalCryptoValue = totalCryptoLive; 
+
+    // Calcolo Live Liquidità (EURC fisso + USDC esposto al Forex live)
+    // Se isLiveConnected è true, exchangeRateEurUsd è (es.) 1.08. Quindi 100 USDC in EUR = 100 / 1.08
+    let usdcLiveEur = isLiveConnected ? (p.liquidity.usdc.qty / exchangeRateEurUsd) : usdcBaseEur;
+    let liqLiveEur = p.liquidity.eurc + usdcLiveEur;
+
+    // --- 3. AGGIORNAMENTO ARRAY GRAFICI ---
+    let etfBase = cur === 'usd' ? etfBaseEur * exchangeRateEurUsd : etfBaseEur;
+    
+    // Seleziona la valuta di visualizzazione per la liquidità sui grafici
+    let liqBaseChart = cur === 'usd' ? (p.liquidity.eurc * exchangeRateEurUsd) + p.liquidity.usdc.qty : liqBaseEur;
+    let liqLiveChart = cur === 'usd' ? (p.liquidity.eurc * exchangeRateEurUsd) + p.liquidity.usdc.qty : liqLiveEur;
+    let cryptoBase = cur === 'usd' ? totalCryptoBaseEur * exchangeRateEurUsd : totalCryptoBaseEur;
+
+    dataMacroBase = [etfBase, liqBaseChart, cryptoBase];
+    dataMacroMarket = [
+        cur === 'usd' ? (p.etf['msci-world'].qty * (isLiveConnected && livePrices['msci-world'] ? livePrices['msci-world'].eur : p.etf['msci-world'].basePriceEur)) * exchangeRateEurUsd : p.etf['msci-world'].qty * (isLiveConnected && livePrices['msci-world'] ? livePrices['msci-world'].eur : p.etf['msci-world'].basePriceEur),
+        liqLiveChart,
+        totalCryptoLive
+    ];
+
+    dataCryptoBase = [btcBase, ethBase, solBase, bnbBase, taoBase, ondoBase, indexBaseEur].map(v => cur === 'usd' ? v * exchangeRateEurUsd : v);
+    dataCryptoMarket = [btcLive, ethLive, solLive, bnbLive, taoLive, ondoLive, indexLive];
+
+    detailConfig[2].dataBase = dataCryptoBase;
+    detailConfig[2].dataMarket = dataCryptoMarket;
+    // --- STAMPA DEL NET WORTH DENTRO IL GRAFICO E AUTOFINANZIAMENTO ---
+        const totalInvested = dataMacroBase[0] + dataMacroBase[1] + dataMacroBase[2];
+        const totalLive = dataMacroMarket[0] + dataMacroMarket[1] + dataMacroMarket[2];
+        const heroEl = document.getElementById('chartHeroMetric');
+        const subEl = document.getElementById('chartHeroSub');
+        
+        if (heroEl) {
+            const valToShow = isMarketView ? totalLive : totalInvested;
+            heroEl.innerHTML = `${sym} ${valToShow.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            heroEl.style.color = isMarketView ? '#00e676' : '#dce6f2';
+            
+            // Attiva il respiro in Market View, lo spegne in Base Cost
+            if (isMarketView) {
+                heroEl.classList.add('live-pulse-text');
+            } else {
+                heroEl.classList.remove('live-pulse-text');
+                heroEl.style.textShadow = 'none';
+            }
+
+            if (interfaceUnlocked) heroEl.style.opacity = '1';
+        }
+
+        if (subEl) {
+            const fiatPuro = STORICO[STORICO.length - 1].i; 
+            const fiatConverted = cur === 'usd' ? fiatPuro * exchangeRateEurUsd : fiatPuro;
+            const autoFunding = totalInvested - fiatConverted;
+            
+            if (autoFunding > 0) {
+                subEl.innerHTML = `↳ Net Fiat: <span style="color:#fff;">${sym}${fiatConverted.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span> | On-Chain Yield: <span style="color:#00e676;">+${sym}${autoFunding.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+                subEl.style.display = 'block';
+                if (interfaceUnlocked) subEl.style.opacity = '1';
+            } else {
+                subEl.style.display = 'none';
+                subEl.style.opacity = '0';
+            }
+        }
+
+    updateChartsUI();
+    updateSalaControllo(); 
+    updateMacroTgt(); 
+
+    // ── AUTO-SYNC STORICO ──────────────
+        if (isMarketView && isLiveConnected) {
+            const totalLive = dataMacroMarket[0] + dataMacroMarket[1] + dataMacroMarket[2];
+            
+            // FILTRO FORENSE: Normalizziamo sempre in Euro prima di scrivere nell'Hard Disk (STORICO)
+            const totalLiveEur = currentCurrency === 'usd' ? (totalLive / exchangeRateEurUsd) : totalLive;
+            
+            const lastPoint = STORICO[STORICO.length - 1];
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (lastPoint.d === today) {
+                lastPoint.v = Math.round(totalLiveEur);
+            } else {
+                STORICO.push({ d: today, i: lastPoint.i, v: Math.round(totalLiveEur) });
+            }
+            
+            if (historyChart) {
+                const pts = getFilteredData(currentTf);
+                historyChart.data.labels = pts.map(p => p.d);
+                historyChart.data.datasets[0].data = pts.map(p => p.v);
+                historyChart.data.datasets[1].data = pts.map(p => p.i);
+                historyChart.update("none");
+            }
+        }
+
+    // --- GESTIONE PRIVACY DEFI MATRIX ---
+    if (isLiveConnected && isMarketView) {
+        document.querySelectorAll('#slide-defi .ticker-usd[data-cg-id]').forEach(el => {
+            const assetId = el.getAttribute('data-cg-id');
+            const qty = parseFloat(el.getAttribute('data-qty'));
+            if (livePrices[assetId]) {
+                const val = qty * livePrices[assetId][cur];
+                el.innerHTML = `Net Value: ${sym} <span class="sensitive-data">${val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+                el.classList.add('live-value-highlight');
+            }
+        });
+    } else {
+        document.querySelectorAll('#slide-defi .ticker-usd').forEach(el => el.classList.remove('live-value-highlight'));
+    }
+}
+
+    function updateSalaControllo() {
+        const p = CONFIG.PORTFOLIO;
+        const cur = currentCurrency;
+        const sym = cur === 'usd' ? '$' : '€';
+        const assets = [
+            { id: 'bitcoin', type: 'crypto' }, { id: 'ethereum', type: 'crypto' },
+            { id: 'solana', type: 'crypto' }, { id: 'binancecoin', type: 'crypto' },
+            { id: 'bittensor', type: 'crypto' }, { id: 'ondo-finance', type: 'crypto' },
+            { id: 'low-cap-index', type: 'crypto' }, { id: 'msci-world', type: 'etf' }
+        ];
+
+        const tbody = document.getElementById('tickerBody');
+        // Usiamo i vecchi elementi o ricreiamo per sicurezza
+        assets.forEach(asset => {
+            const qtyEl = document.getElementById(`qty-${asset.id}`); 
+            const priceEl = document.getElementById(`price-${asset.id}`);
+            const changeEl = document.getElementById(`change-${asset.id}`); 
+            const valEl = document.getElementById(`val-${asset.id}`);
+            const col6El = document.getElementById(`col6-${asset.id}`); 
+
+            if (priceEl && valEl && col6El && changeEl) {
+                let isBasket = asset.id === 'low-cap-index';
+let qty, baseCostEur, investedCapital, liveP, isOnline, change24h, totalVal;
+
+if (isBasket) {
+    qty = 4; // Mostriamo il numero di asset nel basket
+    baseCostEur = p.crypto[asset.id].computedBaseEur;
+    investedCapital = cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur;
+    totalVal = p.crypto[asset.id].computedLive;
+    change24h = p.crypto[asset.id].computedChange;
+    isOnline = isLiveConnected;
+    liveP = totalVal; 
+} else {
+                    qty = asset.type === 'crypto' ? p.crypto[asset.id].qty : p.etf[asset.id].qty;
+                    baseCostEur = asset.type === 'crypto' ? p.crypto[asset.id].basePriceEur : p.etf[asset.id].basePriceEur;
+                    investedCapital = qty * (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur);
+                    if (isLiveConnected && livePrices[asset.id] && livePrices[asset.id].eur) {
+                        liveP = cur === 'usd' ? (livePrices[asset.id].usd || livePrices[asset.id].eur * exchangeRateEurUsd) : livePrices[asset.id].eur;
+                        change24h = asset.type === 'crypto' ? livePrices[asset.id][`${cur}_24h_change`] : livePrices[asset.id].eur_24h_change;
+                        isOnline = true;
+                    } else { liveP = (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur); isOnline = false; }
+                    totalVal = qty * liveP;
+                }
+
+                if (qtyEl) qtyEl.innerHTML = `<span class="sensitive-data">${isBasket ? '4 Assets' : qty.toLocaleString('en-US',{maximumFractionDigits:5})}</span>`;
+                
+                if (isMarketView && isOnline) {
+                    changeEl.innerHTML = `<span style="color: ${change24h >= 0 ? '#00e676' : '#ff5252'}; font-family: monospace; font-weight:600;">${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%</span>`;
+                    priceEl.innerHTML = `<span class="live-value-highlight">${isBasket ? 'Avg Index' : sym + ' ' + liveP.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits:4})}</span>`;
+                    valEl.innerHTML = `<span class="live-value-highlight"><span class="sensitive-data">${sym} ${totalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
+                    
+                    if (currentViewMode === 'tgt' && asset.type === 'crypto') {
+                        const t = p.crypto[asset.id].target;
+                        const c = (totalVal / currentTotalCryptoValue) * 100;
+                        const d = c - t;
+                        col6El.innerHTML = `<span class="tgt-text">Att: <span class="sensitive-data">${c.toFixed(1)}%</span> / Tgt: ${t}%</span>
+                                            <div class="tgt-bar-container"><div class="tgt-bar-fill ${d >= 0 ? 'over' : 'under'}" style="width: ${Math.min(Math.abs(d) * 5, 50)}%;"></div></div>`;
+                    } else if (currentViewMode === 'tgt' && asset.type === 'etf') {
+                        col6El.innerHTML = `<span class="badge spento">N/A</span>`;
+                    } else {
+                        let pnlV = totalVal - investedCapital;
+                        let pnlP = (investedCapital > 0) ? (pnlV / investedCapital) * 100 : 0;
+                        let sign = pnlV >= 0 ? '+' : '-';
+                        
+                        let strVal = `${sign}${sym}${Math.abs(pnlV).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        let strPct = `${sign}${Math.abs(pnlP).toFixed(2)}%`;
+
+                        if (currentViewMode === 'pnl_val') {
+                            // MODO VAL: Valore primario blurrato, Percentuale secondaria in chiaro tra parentesi
+                            col6El.innerHTML = `<span style="color: ${pnlV >= 0 ? '#00e676' : '#ff5252'}; font-weight: bold; font-family:monospace; font-size:1.1em;"><span class="sensitive-data">${strVal}</span> <br><span style="font-size:0.85em; opacity:0.8;">(${strPct})</span></span>`;
+                        } else {
+                            // MODO %: Percentuale primaria in chiaro, Valore secondario blurrato (PARENTESI INCLUSE NEL BLUR)
+                            col6El.innerHTML = `<span style="color: ${pnlV >= 0 ? '#00e676' : '#ff5252'}; font-weight: bold; font-family:monospace; font-size:1.1em;">${strPct} <br><span style="font-size:0.85em; opacity:0.8;"><span class="sensitive-data">(${strVal})</span></span></span>`;
+                        }
+                    }
+                } else {
+    changeEl.innerHTML = `<span style="color: #444; font-family: monospace;">--</span>`;
+    let prezzoMostrato = isBasket ? 'Basket Index' : sym + (cur === 'usd' ? (p.crypto[asset.id] ? p.crypto[asset.id].basePriceEur : p.etf[asset.id].basePriceEur) * exchangeRateEurUsd : (p.crypto[asset.id] ? p.crypto[asset.id].basePriceEur : p.etf[asset.id].basePriceEur)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    priceEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${prezzoMostrato}</span> <span style="font-size: 0.7em; color: #555; font-family: monospace;">(Entry)</span></span>`;
+    valEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${sym}${investedCapital.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
+    col6El.innerHTML = `<span class="badge spento">Punto Zero</span>`;
+}
+            }
+        });
+        
+        if (currentSortColumn && currentViewMode !== 'tgt') {
+            applySort(currentSortColumn, currentSortOrder);
+        }
+    }
+
+
+    function switchView(mode) {
+        if (!interfaceUnlocked) return;
+        currentViewMode = mode;
+        
+        document.getElementById('btn-val').classList.remove('active-switch');
+        document.getElementById('btn-pct').classList.remove('active-switch');
+        document.getElementById('btn-tgt').classList.remove('active-switch');
+        
+        if (mode === 'pnl_val') document.getElementById('btn-val').classList.add('active-switch');
+        if (mode === 'pnl_pct') document.getElementById('btn-pct').classList.add('active-switch');
+        if (mode === 'tgt') document.getElementById('btn-tgt').classList.add('active-switch');
+
+        updateSalaControllo(); // 1. Cambia l'aspetto visivo (da € a %)
+
+        // 2. Applica l'ordinamento se sei su VAL o %
+        if (mode === 'pnl_val' || mode === 'pnl_pct') {
+            handleSort(mode);
+        }
+    }
+    
+    function switchMacroView(mode) {
+        if (!interfaceUnlocked) return;
+        document.getElementById('btn-macro-chart').classList.remove('active-switch');
+        document.getElementById('btn-macro-tgt').classList.remove('active-switch');
+        
+        if (mode === 'chart') {
+            document.getElementById('btn-macro-chart').classList.add('active-switch');
+            document.body.classList.remove('macro-tgt-active');
+        } else {
+            document.getElementById('btn-macro-tgt').classList.add('active-switch');
+            document.body.classList.add('macro-tgt-active');
+            updateMacroTgt();
+        }
+    }
+
+    // --- CALCOLO MACRO TGT (IL RADAR 33/33/33) ---
+    function updateMacroTgt() {
+        const dataSet = isMarketView ? dataMacroMarket : dataMacroBase;
+        const total = dataSet[0] + dataSet[1] + dataSet[2];
+        if (total === 0) return;
+
+        const target = 33.33;
+        const etfPct = (dataSet[0] / total) * 100;
+        const liqPct = (dataSet[1] / total) * 100;
+        const cryptoPct = (dataSet[2] / total) * 100;
+
+        const updateBar = (id, pct) => {
+            const delta = pct - target;
+            const bar = document.getElementById(`macro-tgt-${id}-bar`);
+            const num = document.getElementById(`macro-tgt-${id}-num`);
+            
+            // --- MODIFICA PRIVACY RADAR MACRO (Incluso % attuale) ---
+            num.innerHTML = `<span class="sensitive-data">${pct.toFixed(1)}%</span> / ${target}%`;
+            
+            // Visualizzazione Barra
+            if (delta >= 0) {
+                bar.className = 'macro-bar-fill over';
+                bar.style.width = `${Math.min(Math.abs(delta) * 3, 50)}%`; 
+            } else {
+                bar.className = 'macro-bar-fill under';
+                bar.style.width = `${Math.min(Math.abs(delta) * 3, 50)}%`;
+            }
+        };
+
+        updateBar('etf', etfPct);
+        updateBar('liq', liqPct);
+        updateBar('crypto', cryptoPct);
+    }
+
+    function handleSort(columnId) {
+        if (!interfaceUnlocked) return;
+        
+        if (currentViewMode === 'tgt' && columnId !== 'pnl_val' && columnId !== 'pnl_pct') {
+            switchView('pnl_pct');
+        }
+
+        if (currentSortColumn === columnId) {
+            currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortColumn = columnId;
+            currentSortOrder = 'desc'; 
+        }
+        applySort(currentSortColumn, currentSortOrder);
+    }
+
+
+    function applySort(columnId, order) {
+        if (currentViewMode === 'tgt') return; 
+
+        const tbody = document.getElementById('tickerBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const p = CONFIG.PORTFOLIO;
+        const cur = currentCurrency;
+
+        const getMetrics = (id) => {
+            let baseV = 0, liveV = 0, chg = 0, price = 0;
+            let isBasket = id === 'low-cap-index';
+            let isEtf = id === 'msci-world';
+
+            if (isBasket) {
+                baseV = p.crypto[id].computedBaseEur * (cur === 'usd' ? exchangeRateEurUsd : 1);
+                liveV = p.crypto[id].computedLive;
+                chg = p.crypto[id].computedChange;
+                price = liveV; 
+            } else {
+                let asset = isEtf ? p.etf[id] : p.crypto[id];
+                baseV = asset.qty * asset.basePriceEur * (cur === 'usd' ? exchangeRateEurUsd : 1);
+                
+                if (isLiveConnected && livePrices[id] && livePrices[id].eur) {
+                    let pLive = cur === 'usd' ? (livePrices[id].usd || livePrices[id].eur * exchangeRateEurUsd) : livePrices[id].eur;
+                    liveV = asset.qty * pLive;
+                    chg = isEtf ? livePrices[id].eur_24h_change : livePrices[id][`${cur}_24h_change`];
+                    price = pLive;
+                } else {
+                    liveV = baseV;
+                    price = asset.basePriceEur * (cur === 'usd' ? exchangeRateEurUsd : 1);
+                }
+            }
+
+            return {
+                capital: isMarketView ? liveV : baseV,
+                change: isMarketView ? chg : 0,
+                price: isMarketView ? price : (isBasket ? baseV : (isEtf ? p.etf[id].basePriceEur : p.crypto[id].basePriceEur) * (cur === 'usd' ? exchangeRateEurUsd : 1)),
+                pnl_val: isMarketView ? (liveV - baseV) : 0,
+                pnl_pct: isMarketView && baseV > 0 ? ((liveV - baseV) / baseV) * 100 : 0
+            };
+        };
+
+        rows.sort((a, b) => {
+            const idA = a.getAttribute('data-id');
+            const idB = b.getAttribute('data-id');
+
+            if (columnId === 'asset') {
+                return order === 'asc' ? idA.localeCompare(idB) : idB.localeCompare(idA);
+            }
+
+            const mA = getMetrics(idA);
+            const mB = getMetrics(idB);
+
+            let valA = 0, valB = 0;
+            if (columnId === 'price') { valA = mA.price; valB = mB.price; }
+            else if (columnId === '24h') { valA = mA.change; valB = mB.change; }
+            else if (columnId === 'capital') { valA = mA.capital; valB = mB.capital; }
+            else if (columnId === 'pnl_val') { valA = mA.pnl_val; valB = mB.pnl_val; }
+            else if (columnId === 'pnl_pct') { valA = mA.pnl_pct; valB = mB.pnl_pct; }
+
+            if (valA < valB) return order === 'asc' ? -1 : 1;
+            if (valA > valB) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+
+    const sliderWrapper = document.getElementById('sliderWrapper');
+    const dot1 = document.getElementById('dot1');
+    const dot2 = document.getElementById('dot2');
+    const tableTitle = document.getElementById('dynamicTableTitle');
+
+    if(sliderWrapper) {
+        sliderWrapper.addEventListener('scroll', () => {
+            const scrollLeft = sliderWrapper.scrollLeft;
+            const slideWidth = sliderWrapper.clientWidth;
+            const slideIndex = Math.round(scrollLeft / slideWidth);
+
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('active', i === slideIndex);
+            });
+
+            const titles = ["Portfolio History", "Sala Controllo (Ticker Live)", "Matrice dei Protocolli DeFi"];
+            
+            // Qui definiamo i tre sottotitoli esatti (il terzo mantiene il testo originale con il pallino)
+            const subtitles = [
+                `<span class="legend-text">Analisi Forense | Net Fiat vs PnL Globale</span>`,
+                `<span class="legend-text">Sorveglianza Asset | Target e Ribilanciamento</span>`,
+                `<div class="legend-dot-static"></div><span class="legend-text">Rewards Attive | Monitoraggio Flussi On-Chain</span>`
+            ];
+
+            tableTitle.textContent = titles[slideIndex] || titles[0];
+            
+            // Animazione di dissolvenza
+            const subtitleEl = document.getElementById('dynamicSubtitle');
+            if (subtitleEl) {
+                subtitleEl.style.opacity = '0';
+                setTimeout(() => {
+                    subtitleEl.innerHTML = subtitles[slideIndex] || subtitles[0];
+                    subtitleEl.style.opacity = '1';
+                }, 200); 
+            }
+        });
+    }
+const currencyBtn = document.getElementById('currencyBtn');
+const marketBtn = document.getElementById('marketBtn');
+const viewModeText = document.getElementById('viewModeText');
+let interfaceUnlocked = false; 
+
+function updateForexDisplay() {
+    const display = document.getElementById('forexDisplay');
+    if(!display || !isLiveConnected) return;
+
+    if(currentCurrency === 'eur') {
+        display.innerText = `1€ = $${exchangeRateEurUsd.toFixed(3)}`;
+    } else {
+        const usdToEur = 1 / exchangeRateEurUsd;
+        display.innerText = `$1 = €${usdToEur.toFixed(3)}`;
+    }
+    display.style.color = "#dce6f2";
+    display.style.textShadow = "0 0 8px rgba(220, 230, 242, 0.5)";
+}
+
+currencyBtn.addEventListener('click', () => {
+    if(!interfaceUnlocked) return; 
+
+    currentCurrency = currentCurrency === 'eur' ? 'usd' : 'eur';
+    
+    if (currentCurrency === 'usd') {
+        currencyBtn.innerHTML = '$'; 
+        currencyBtn.classList.remove('btn-eur');
+        currencyBtn.classList.add('btn-usd');
+    } else {
+        currencyBtn.innerHTML = '€';
+        currencyBtn.classList.remove('btn-usd');
+        currencyBtn.classList.add('btn-eur');
+    }
+    
+    updateForexDisplay();   
+    calculateDynamicData(); 
+});
+
+marketBtn.addEventListener('click', () => {
+        if(!interfaceUnlocked) return; 
+
+        isMarketView = !isMarketView;
+
+        if(isMarketView) {
+            marketBtn.classList.add('active');
+            viewModeText.innerHTML = `Visualizzazione attuale: <strong>Potenza di Mercato (Live API)</strong>`;
+        } else {
+            marketBtn.classList.remove('active');
+            viewModeText.innerHTML = `Visualizzazione attuale: <strong>Base di Costo (Punti Zero)</strong>`;
+        }
+
+        // --- SINCRONIZZAZIONE GRAFICO STORICO ---
+        if (typeof historyChart !== 'undefined' && historyChart) {
+            historyChart.setDatasetVisibility(0, isMarketView); // Nasconde o mostra la linea del mercato
+            historyChart.update();
+        }
+
+        calculateDynamicData();
+    });
+
+    function updateChartsUI() {
+        macroChart.data.datasets[0].data = isMarketView ? dataMacroMarket : dataMacroBase;
+        if (activeMacroIndex !== null) {
+            detailChart.data.datasets[0].data = detailConfig[activeMacroIndex][isMarketView ? 'dataMarket' : 'dataBase'];
+        }
+        macroChart.update();
+        if(activeMacroIndex !== null) detailChart.update();
+    }
+
+    // --- MODIFICA PRIVACY TOOLTIP GRAFICI ---
+    const opsecTooltip = {
+        callbacks: {
+            title: () => null, 
+            label: function(context) {
+                let sum = context.dataset.data.reduce((a, b) => a + b, 0);
+                let percentage = ((context.raw / sum) * 100).toFixed(1) + '%';
+                
+                // Se la privacy è ON, nasconde i soldi ma lascia la percentuale
+                if (document.body.classList.contains('privacy-on')) {
+                    return `${context.label} | █ █ █ (${percentage})`;
+                }
+                
+                let val = parseFloat(context.raw).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                let sym = currentCurrency === 'usd' ? '$' : '€';
+                return `${context.label} | ${sym}${val} (${percentage})`;
+            }
+        }
+    };
+
+    const makeGrad = (ctx, area, c1, c2) => {
+        const grad = ctx.createLinearGradient(area.left, area.top, area.right, area.bottom);
+        grad.addColorStop(0, c1); grad.addColorStop(1, c2); return grad;
+    };
+
+    const glowColors = ['rgba(0, 229, 255, 0.5)', 'rgba(220, 220, 235, 0.5)', 'rgba(255, 183, 77, 0.5)'];
+    const borderColors = ['#00e5ff', '#dcdceb', '#ffb74d'];
+
+    const getMacroGradients = (ctx, chartArea) => {
+        const cx = (chartArea.left + chartArea.right) / 2; const cy = (chartArea.top + chartArea.bottom) / 2; const r = Math.min(cx, cy);
+        const gradETF = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); gradETF.addColorStop(0, '#3a7bd5'); gradETF.addColorStop(1, '#1a4abf');
+        const gradLiq = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); gradLiq.addColorStop(0, '#595968'); gradLiq.addColorStop(1, '#2a2a35');
+        const gradCrypto = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); gradCrypto.addColorStop(0, '#ffb74d'); gradCrypto.addColorStop(1, '#d84315');
+        return [gradETF, gradLiq, gradCrypto];
+    };
+
+    const getDimmedMacroGradients = (ctx, chartArea) => {
+        const cx = (chartArea.left + chartArea.right) / 2; const cy = (chartArea.top + chartArea.bottom) / 2; const r = Math.min(cx, cy);
+        const gradETF = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); gradETF.addColorStop(0, '#0a1220'); gradETF.addColorStop(1, '#050910');
+        const gradLiq = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); gradLiq.addColorStop(0, '#15151a'); gradLiq.addColorStop(1, '#0c0c0f');
+        const gradCrypto = ctx.createRadialGradient(cx, cy, 0, cx, cy, r); gradCrypto.addColorStop(0, '#1a0f05'); gradCrypto.addColorStop(1, '#0d0702');
+        return [gradETF, gradLiq, gradCrypto];
+    };
+
+    const detailConfig = {
+        0: { 
+            title: 'ETF Settoriale (MSCI World)',
+            labels: ['Tech', 'Financials', 'Industrials', 'Cons. Discretionary', 'Health Care', 'Comm Services', 'Altri Settori'],
+            dataBase: [26.2, 16.74, 11.61, 9.82, 9.66, 8.98, 17.0], dataMarket: [26.2, 16.74, 11.61, 9.82, 9.66, 8.98, 17.0], 
+            getGradients: (ctx, area) => [
+                makeGrad(ctx, area, '#03045e', '#023e8a'), makeGrad(ctx, area, '#023e8a', '#0077b6'), makeGrad(ctx, area, '#0077b6', '#0096c7'), makeGrad(ctx, area, '#0096c7', '#00b4d8'), makeGrad(ctx, area, '#00b4d8', '#48cae4'), makeGrad(ctx, area, '#48cae4', '#90e0ef'), makeGrad(ctx, area, '#90e0ef', '#caf0f8')
+            ]
+        },
+        1: { 
+            title: 'Liquidità (Il Paracadute)',
+            labels: ['Kamino (USDG)', 'Jupiter Lend (EURC)', 'Sail Money (EURC)', 'Loopscale (ONyc)', 'Carrot (ONyc)'],
+            dataBase: [1000, 1450, 1450, 1000, 900], dataMarket: [1000, 1450, 1450, 1000, 900],
+            getGradients: (ctx, area) => [
+                makeGrad(ctx, area, '#2b2b36', '#3f3f4e'), makeGrad(ctx, area, '#3f3f4e', '#595968'), makeGrad(ctx, area, '#595968', '#78788c'), makeGrad(ctx, area, '#78788c', '#9a9ab0'), makeGrad(ctx, area, '#9a9ab0', '#c2c2d6')
+            ]
+        },
+2: { 
+            title: 'Scomposizione Crypto (AI & RWA)',
+            labels: ['BTC', 'ETH', 'SOL', 'BNB', 'TAO (AI)', 'ONDO (RWA)', 'Low Cap Index'],
+            dataBase: [], dataMarket: [], 
+            getGradients: (ctx, area) => [
+                makeGrad(ctx, area, '#ffcc80', '#f7931a'), 
+                makeGrad(ctx, area, '#9fa8da', '#627eea'), 
+                makeGrad(ctx, area, '#69f0ae', '#14f195'), 
+                makeGrad(ctx, area, '#ffe082', '#f3ba2f'), 
+                makeGrad(ctx, area, '#ce93d8', '#9c27b0'), 
+                makeGrad(ctx, area, '#80deea', '#00bcd4'),
+                makeGrad(ctx, area, '#b0bec5', '#616161') // Grigio Argento per l'Index
+            ]
+        }
+    };
+
+    let activeMacroIndex = null;
+    Chart.defaults.color = '#888'; Chart.defaults.font.family = "'Inter', sans-serif";
+
     const ctxMacro = document.getElementById('macroChart').getContext('2d');
     const macroChart = new Chart(ctxMacro, {
         type: 'doughnut',
         data: {
-            labels: ['La Roccia (ETF)', 'Il Paracadute (Liquidità)', 'Crypto (Big Cap)'],
+            labels: ['La Roccia (ETF)', 'Il Paracadute (Liquidità)', 'Crypto (Big Cap & Alt)'],
             datasets: [{
-                data: [36.2, 31.0, 32.8],
-                backgroundColor: ['#2962ff', '#424242', '#ff9100'],
-                borderColor: '#151515',
-                borderWidth: 4,
-                hoverBorderColor: '#333'
+                data: [33, 33, 33], 
+                backgroundColor: function(context) {
+                    const {ctx, chartArea} = context.chart; if (!chartArea) return null;
+                    const grads = getMacroGradients(ctx, chartArea); const dimGrads = getDimmedMacroGradients(ctx, chartArea);
+                    if (activeMacroIndex !== null && activeMacroIndex !== context.dataIndex) return dimGrads[context.dataIndex];
+                    return grads[context.dataIndex];
+                },
+                borderColor: '#151515', borderWidth: 4, hoverBorderColor: borderColors, hoverBorderWidth: 2
             }]
         },
         options: {
-            onHover: (event, chartElement) => {
-                event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            onHover: (event, elements, chart) => {
+                if (elements.length > 0) {
+                    event.native.target.style.cursor = 'pointer'; chart.canvas.style.filter = `drop-shadow(0 0 15px ${glowColors[elements[0].index]})`;
+                } else { event.native.target.style.cursor = 'default'; chart.canvas.style.filter = 'none'; }
             },
             onClick: (e, elements) => {
-                if (elements.length > 0 && elements[0].index === 2) {
-                    document.getElementById('cryptoDetailContainer').style.display = 'block';
-                    document.querySelector('.click-instruction').style.display = 'none'; // Nasconde l'istruzione dopo il click
+                if (elements.length > 0) {
+                    if (!interfaceUnlocked) {
+                        interfaceUnlocked = true;
+                        document.body.classList.add('unlocked'); 
+                        document.querySelectorAll('.micro-switch.inactive').forEach(el => el.classList.remove('inactive'));
+                        
+                        // Ordine di accensione per Metriche e Autofinanziamento
+                        const heroEl = document.getElementById('chartHeroMetric');
+                        if (heroEl) heroEl.style.opacity = '1';
+                        const subEl = document.getElementById('chartHeroSub');
+                        if (subEl) subEl.style.opacity = '1'; // Ora si accende sempre
+
+                        updateSalaControllo(); 
+                    }
+
+                    activeMacroIndex = elements[0].index; const config = detailConfig[activeMacroIndex];
+                    const container = document.getElementById('detailChartContainer'); const title = document.getElementById('detailChartTitle');
+
+                    title.textContent = config.title; detailChart.data.labels = config.labels;
+                    detailChart.data.datasets[0].data = isMarketView ? config.dataMarket : config.dataBase;
+                    detailChart.data.datasets[0].backgroundColor = function(context) {
+                        const {ctx, chartArea} = context.chart; if (!chartArea) return null;
+                        return config.getGradients(ctx, chartArea)[context.dataIndex];
+                    };
+                    detailChart.data.datasets[0].hoverBorderColor = borderColors[activeMacroIndex];
+
+                    container.style.opacity = '1'; container.style.filter = 'grayscale(0%)';
+                    container.style.boxShadow = `0 0 25px ${glowColors[activeMacroIndex].replace('0.5', '0.15')}`; container.style.borderColor = glowColors[activeMacroIndex].replace('0.5', '0.3');
+                    macroChart.update(); detailChart.update();
                 }
             },
-            plugins: {
-                legend: { position: 'bottom', padding: 20 }
-            }
+            plugins: { legend: { position: 'bottom', padding: 20 }, tooltip: opsecTooltip }
         }
     });
 
-    const ctxCrypto = document.getElementById('cryptoChart').getContext('2d');
-    new Chart(ctxCrypto, {
+    const ctxDetail = document.getElementById('detailChart').getContext('2d');
+    const detailChart = new Chart(ctxDetail, {
         type: 'pie',
         data: {
-            labels: ['BTC', 'ETH', 'SOL', 'BNB'],
+            labels: detailConfig[2].labels,
             datasets: [{
-                data: [49.1, 14.8, 21.3, 14.8],
-                backgroundColor: ['#f7931a', '#627eea', '#14f195', '#f3ba2f'],
-                borderColor: '#151515',
-                borderWidth: 4
+                data: [1], backgroundColor: ['#333'], borderColor: '#151515', borderWidth: 4, hoverBorderWidth: 2
             }]
         },
         options: {
-            plugins: {
-                legend: { position: 'bottom' }
-            }
+            onHover: (event, elements, chart) => {
+                if (elements.length > 0 && activeMacroIndex !== null) {
+                    event.native.target.style.cursor = 'pointer'; chart.canvas.style.filter = `drop-shadow(0 0 15px ${glowColors[activeMacroIndex]})`;
+                } else { event.native.target.style.cursor = 'default'; chart.canvas.style.filter = 'none'; }
+            },
+            plugins: { legend: { position: 'bottom' }, tooltip: opsecTooltip }
         }
     });
-</script>
 
+    const privacyBtnToggle = document.getElementById('privacyBtn');
+    if(privacyBtnToggle) {
+        privacyBtnToggle.addEventListener('click', () => {
+            document.body.classList.toggle('privacy-on');
+            const isOn = document.body.classList.contains('privacy-on');
+            document.getElementById('privacyText').innerText = isOn ? 'PRIVACY ON' : 'PRIVACY OFF';
+            document.getElementById('lockIcon').innerHTML = isOn 
+                ? '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>' 
+                : '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>';
+            privacyBtnToggle.style.color = isOn ? '#fff' : '#4fc3f7';
+            privacyBtnToggle.style.backgroundColor = isOn ? '#ff5252' : '#121212';
+            privacyBtnToggle.style.borderColor = isOn ? '#ff5252' : '#1a4abf';
+            
+            // Forza il re-render istantaneo di tutti i grafici per applicare/rimuovere i blocchi neri
+            if (typeof historyChart !== 'undefined' && historyChart) historyChart.update('none');
+            if (typeof macroChart !== 'undefined' && macroChart) macroChart.update('none');
+            if (typeof detailChart !== 'undefined' && detailChart) detailChart.update('none');
+        });
+    }
+
+   
+  // ── STORICO DATASET  ──────────────
+const STORICO = [
+  // --- ANNO 2021 (Genesi) ---
+  { d: "2021-05-01", i: 90, v: 144 },
+  { d: "2021-06-01", i: 90, v: 90 },
+  { d: "2021-07-01", i: 1938, v: 1794 },
+  { d: "2021-08-01", i: 2718, v: 3022 },
+  { d: "2021-09-01", i: 3604, v: 5308 },
+  { d: "2021-10-01", i: 3635, v: 4871 },
+  { d: "2021-11-01", i: 3834, v: 6408 },
+  { d: "2021-12-01", i: 3834, v: 5862 },
+
+  // --- ANNO 2022 (Bear Market) ---
+  { d: "2022-01-01", i: 3908, v: 5546 },
+  { d: "2022-02-01", i: 3974, v: 4711 },
+  { d: "2022-03-01", i: 4060, v: 4586 },
+  { d: "2022-04-01", i: 4122, v: 5554 },
+  { d: "2022-05-01", i: 4274, v: 4657 },
+  { d: "2022-06-01", i: 4395, v: 3701 },
+  { d: "2022-07-01", i: 4395, v: 2730 },
+  { d: "2022-08-01", i: 4395, v: 3549 },
+  { d: "2022-09-01", i: 4395, v: 3206 },
+  { d: "2022-10-01", i: 4395, v: 3116 },
+  { d: "2022-11-01", i: 4395, v: 3455 },
+  { d: "2022-12-01", i: 4953, v: 3292 },
+
+  // --- ANNO 2023 (Accumulo e Transizione) ---
+  { d: "2023-01-01", i: 5589, v: 3791 },
+  { d: "2023-02-01", i: 5589, v: 4852 },
+  { d: "2023-03-01", i: 6201, v: 4918 },
+  { d: "2023-04-01", i: 6201, v: 6174 },
+  { d: "2023-05-01", i: 6201, v: 6127 },
+  { d: "2023-06-01", i: 6201, v: 5682 },
+  { d: "2023-07-01", i: 6201, v: 6057 },
+  { d: "2023-08-01", i: 6201, v: 5811 },
+  { d: "2023-09-01", i: 6201, v: 5199 },
+  { d: "2023-10-01", i: 6201, v: 5265 },
+  { d: "2023-11-01", i: 6201, v: 6650 },
+  { d: "2023-12-01", i: 6201, v: 7511 },
+
+  // --- ANNO 2024 (La Strutturazione) ---
+  { d: "2024-01-01", i: 6201, v: 8256 },
+  { d: "2024-02-01", i: 6431, v: 8210 },
+  { d: "2024-03-01", i: 7535, v: 13131 },
+  { d: "2024-04-01", i: 10230, v: 20132 },
+  { d: "2024-05-01", i: 11887, v: 19383 },
+  { d: "2024-06-01", i: 13650, v: 22413 },
+  { d: "2024-07-01", i: 14453, v: 20768 },
+  { d: "2024-08-01", i: 15374, v: 21758 },
+  { d: "2024-09-01", i: 16154, v: 20729 },
+  { d: "2024-10-01", i: 16934, v: 22733 },
+  { d: "2024-11-01", i: 18131, v: 30506 },
+  { d: "2024-12-01", i: 20054, v: 36180 },
+
+  // --- ANNO 2025 (Fase Flow Architect) ---
+  { d: "2025-01-01", i: 21548, v: 34788 },
+  { d: "2025-02-01", i: 22016, v: 34940 },
+  { d: "2025-03-01", i: 23864, v: 33825 },
+  { d: "2025-04-01", i: 24878, v: 29675 },
+  { d: "2025-05-01", i: 26052, v: 32452 },
+  { d: "2025-06-01", i: 26937, v: 35502 },
+  { d: "2025-07-01", i: 28064, v: 36695 },
+  { d: "2025-08-01", i: 29036, v: 39995 },
+  { d: "2025-09-01", i: 30299, v: 42397 },
+  { d: "2025-10-01", i: 30299, v: 44909 },
+  { d: "2025-11-01", i: 28985, v: 40552 },
+  { d: "2025-12-01", i: 29765, v: 38017 },
+
+  // --- ANNO 2026 (Protocollo 10k & Presente) ---
+  { d: "2026-01-01", i: 30545, v: 37206 },
+  { d: "2026-01-08", i: 30545, v: 38388 },
+  { d: "2026-01-15", i: 30658, v: 39842 },
+  { d: "2026-01-22", i: 30658, v: 37584 },
+  { d: "2026-02-01", i: 30658, v: 33868 },
+  { d: "2026-02-08", i: 30658, v: 32222 },
+  { d: "2026-02-15", i: 30658, v: 31438 },
+  { d: "2026-02-17", i: 31914, v: 32639 },
+  { d: "2026-02-21", i: 66686, v: 67525 }, // <-- Fase 1 Ribilanciamento
+  { d: "2026-02-24", i: 71795, v: 71713 }, // <-- Fase 2
+  { d: "2026-03-01", i: 73340, v: 74279 }, // <-- Consolidamento
+  { d: "2026-03-10", i: 73340, v: 75754 }  // <-- OGGI
+];
+
+// ── HISTORY CHART ──────────────────────────────────────────────
+let historyChart = null;
+
+function getFilteredData(tf) {
+  const now = new Date();
+  const cutoffs = {
+    "1M": new Date(now - 30  * 86400000),
+    "3M": new Date(now - 90  * 86400000),
+    "1Y": new Date(now - 365 * 86400000),
+    "ALL": new Date("2021-01-01")
+  };
+  const cutoff = cutoffs[tf] || cutoffs["ALL"];
+  return STORICO.filter(p => new Date(p.d) >= cutoff);
+}
+
+function renderHistoryChart(tf = "ALL") {
+  const pts = getFilteredData(tf);
+  const labels = pts.map(p => p.d);
+  const valData = pts.map(p => p.v);
+  const invData = pts.map(p => p.i);
+
+  const ctx = document.getElementById("historyChart");
+  if (!ctx) return;
+
+  if (historyChart) {
+    historyChart.data.labels = labels;
+    historyChart.data.datasets[0].data = valData;
+    historyChart.data.datasets[1].data = invData;
+    historyChart.update("none");
+    return;
+  }
+
+  historyChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Market Value", data: valData, borderColor: "#4ade80", backgroundColor: "rgba(74,222,128,0.08)", borderWidth: 2, pointRadius: 0, pointHoverRadius: 6,
+          pointHoverBackgroundColor: c => getFilteredData(currentTf)[c.dataIndex].v < getFilteredData(currentTf)[c.dataIndex].i ? "#ff5252" : "#4ade80",
+          pointHoverBorderColor: "#fff", pointHoverBorderWidth: 2, fill: true, tension: 0.35, hidden: !isMarketView
+        },
+        {
+          label: "Invested", data: invData, borderColor: "rgba(255,255,255,0.22)", backgroundColor: "transparent", borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, pointHoverRadius: 3, fill: false, tension: 0.2
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
+      onHover: (e, el, chart) => {
+        const legendDot = document.querySelector('.hleg-dot.val');
+        const heroEl = document.getElementById('chartHeroMetric');
+        const subEl = document.getElementById('chartHeroSub');
+        const sym = currentCurrency === 'usd' ? '$' : '€';
+        const rate = currentCurrency === 'usd' ? exchangeRateEurUsd : 1;
+
+        if (el.length > 0) {
+            const pts = getFilteredData(currentTf);
+            const ptStart = pts[0]; // Il punto zero del timeframe
+            const pt = pts[el[0].index];
+            
+            if (pt) {
+                const isLoss = pt.v < pt.i;
+                chart.data.datasets[0].borderColor = isLoss ? "#ff5252" : "#4ade80";
+                chart.data.datasets[0].backgroundColor = isLoss ? "rgba(255,82,82,0.12)" : "rgba(74,222,128,0.08)";
+                if (legendDot) legendDot.style.background = isLoss ? "#ff5252" : "#4ade80";
+                
+                if (heroEl) {
+                    heroEl.classList.remove('live-pulse-text'); 
+                    
+                    if (isMarketView) {
+                        heroEl.innerHTML = `${sym} ${(pt.v * rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        heroEl.style.color = isLoss ? '#ff5252' : '#4ade80';
+                        heroEl.style.textShadow = isLoss ? '0 0 15px rgba(255, 82, 82, 0.4)' : '0 0 15px rgba(74, 222, 128, 0.4)';
+                        
+                        if (subEl) {
+                            const hoverFiat = pt.i * rate;
+                            const hoverTotalPnl = (pt.v * rate) - hoverFiat; // PnL Assoluto
+                            
+                            let displayPnl, displayPct;
+                            if (currentTf === "ALL") {
+                                displayPnl = hoverTotalPnl;
+                                displayPct = hoverFiat > 0 ? (displayPnl / hoverFiat) * 100 : 0;
+                            } else {
+                                // DEPURA I BONIFICI: PnL di oggi meno PnL all'inizio del periodo
+                                const startFiat = ptStart.i * rate;
+                                const startTotalPnl = (ptStart.v * rate) - startFiat;
+                                displayPnl = hoverTotalPnl - startTotalPnl; 
+                                displayPct = hoverFiat > 0 ? (displayPnl / hoverFiat) * 100 : 0; 
+                            }
+
+                            const pnlColor = displayPnl >= 0 ? '#00e676' : '#ff5252';
+                            const sign = displayPnl >= 0 ? '+' : '';
+                            subEl.innerHTML = `<span style="color:#aaa;">[${pt.d}]</span> ↳ Net Fiat: <span style="color:#fff;">${sym}${hoverFiat.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span> | PnL (${currentTf}): <span style="color:${pnlColor};">${sign}${sym}${Math.abs(displayPnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${sign}${Math.abs(displayPct).toFixed(2)}%)</span>`;
+                        }
+                    } else {
+                        const hoverFiat = pt.i * rate;
+                        heroEl.innerHTML = `${sym} ${hoverFiat.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        heroEl.style.color = '#dce6f2'; 
+                        heroEl.style.textShadow = 'none';
+                        
+                        if (subEl) {
+                            subEl.innerHTML = `<span style="color:#aaa;">[${pt.d}]</span> ↳ Capitale Immeso (Net Fiat Storico)`;
+                        }
+                    }
+                }
+                chart.update('none');
+            }
+        } else {
+            resetChartToNormal(chart, legendDot, heroEl, subEl, sym);
+        }
+      },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#555", font: { size: 9 }, maxTicksLimit: 8, maxRotation: 0 } },
+        y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#555", font: { size: 9 }, callback: v => document.body.classList.contains('privacy-on') ? "███" : (currentCurrency === 'usd' ? '$' : '€') + (v * (currentCurrency === 'usd' ? exchangeRateEurUsd : 1)).toLocaleString('en-US', {maximumFractionDigits: 0}) } }
+      }
+    }
+  });
+
+  ctx.addEventListener('mouseleave', () => {
+      if (historyChart) {
+          const legendDot = document.querySelector('.hleg-dot.val');
+          const heroEl = document.getElementById('chartHeroMetric');
+          const subEl = document.getElementById('chartHeroSub');
+          const sym = currentCurrency === 'usd' ? '$' : '€';
+          resetChartToNormal(historyChart, legendDot, heroEl, subEl, sym);
+      }
+  });
+}
+
+function resetChartToNormal(chart, legendDot, heroEl, subEl, sym) {
+    chart.data.datasets[0].borderColor = "#4ade80";
+    chart.data.datasets[0].backgroundColor = "rgba(74,222,128,0.08)";
+    if (legendDot) legendDot.style.background = "#4ade80";
+    
+    const rate = currentCurrency === 'usd' ? exchangeRateEurUsd : 1;
+    
+    if (heroEl) {
+        const totalInvested = dataMacroBase[0] + dataMacroBase[1] + dataMacroBase[2];
+        const totalLive = dataMacroMarket[0] + dataMacroMarket[1] + dataMacroMarket[2];
+        const valToShow = isMarketView ? totalLive : totalInvested;
+        
+        heroEl.innerHTML = `${sym} ${valToShow.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        heroEl.style.color = isMarketView ? '#00e676' : '#dce6f2';
+        
+        if (isMarketView) {
+            heroEl.classList.add('live-pulse-text'); 
+            if (subEl) {
+                const pts = getFilteredData(currentTf);
+                const ptStart = pts[0]; // Baseline del timeframe
+
+                const fiatPuro = STORICO[STORICO.length - 1].i; 
+                const currentFiat = fiatPuro * rate;
+                const currentTotalPnl = totalLive - currentFiat;
+                
+                let displayPnl, displayPct;
+                if (currentTf === "ALL") {
+                    displayPnl = currentTotalPnl;
+                    displayPct = currentFiat > 0 ? (displayPnl / currentFiat) * 100 : 0;
+                } else {
+                    // DEPURA I BONIFICI per il calcolo PnL del periodo
+                    const startFiat = ptStart.i * rate;
+                    const startTotalPnl = (ptStart.v * rate) - startFiat;
+                    displayPnl = currentTotalPnl - startTotalPnl;
+                    displayPct = currentFiat > 0 ? (displayPnl / currentFiat) * 100 : 0;
+                }
+
+                const pnlColor = displayPnl >= 0 ? '#00e676' : '#ff5252';
+                const sign = displayPnl >= 0 ? '+' : '';
+                subEl.innerHTML = `↳ Net Fiat: <span style="color:#fff;">${sym}${currentFiat.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span> | PnL (${currentTf}): <span style="color:${pnlColor};">${sign}${sym}${Math.abs(displayPnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${sign}${Math.abs(displayPct).toFixed(2)}%)</span>`;
+                subEl.style.display = 'block';
+            }
+        } else {
+            heroEl.classList.remove('live-pulse-text');
+            heroEl.style.textShadow = 'none';
+            
+            if (subEl) {
+                const fiatPuro = STORICO[STORICO.length - 1].i; 
+                const currentFiat = fiatPuro * rate;
+                const autoFunding = totalInvested - currentFiat;
+                if (autoFunding > 0) {
+                    subEl.innerHTML = `↳ Net Fiat: <span style="color:#fff;">${sym}${currentFiat.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span> | On-Chain Yield: <span style="color:#00e676;">+${sym}${autoFunding.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+                    subEl.style.display = 'block';
+                }
+            }
+        }
+    }
+    chart.update('none');
+}
+
+let currentTf = "ALL";
+document.querySelectorAll(".tf-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentTf = btn.dataset.tf;
+    document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    if (historyChart) {
+      const pts = getFilteredData(currentTf);
+      historyChart.data.labels = pts.map(p => p.d);
+      historyChart.data.datasets[0].data = pts.map(p => p.v);
+      historyChart.data.datasets[1].data = pts.map(p => p.i);
+      historyChart.update("active");
+
+      // Forza l'aggiornamento visivo immediato del PnL
+      const legendDot = document.querySelector('.hleg-dot.val');
+      const heroEl = document.getElementById('chartHeroMetric');
+      const subEl = document.getElementById('chartHeroSub');
+      const sym = currentCurrency === 'usd' ? '$' : '€';
+      resetChartToNormal(historyChart, legendDot, heroEl, subEl, sym);
+    }
+  });
+});
+
+// ── MOTORE TERMINALE (LOCAL STORAGE POTENZIATO) ──────────────
+function loadLocalData() {
+    const saved = localStorage.getItem('fortezza_config');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        const p = CONFIG.PORTFOLIO;
+        
+        if(parsed.crypto) {
+            if(parsed.crypto.bitcoin) { p.crypto.bitcoin.qty = parsed.crypto.bitcoin.qty; if(parsed.crypto.bitcoin.price) p.crypto.bitcoin.basePriceEur = parsed.crypto.bitcoin.price; }
+            if(parsed.crypto.ethereum) { p.crypto.ethereum.qty = parsed.crypto.ethereum.qty; if(parsed.crypto.ethereum.price) p.crypto.ethereum.basePriceEur = parsed.crypto.ethereum.price; }
+            if(parsed.crypto.solana) { p.crypto.solana.qty = parsed.crypto.solana.qty; if(parsed.crypto.solana.price) p.crypto.solana.basePriceEur = parsed.crypto.solana.price; }
+            if(parsed.crypto.binancecoin) { p.crypto.binancecoin.qty = parsed.crypto.binancecoin.qty; if(parsed.crypto.binancecoin.price) p.crypto.binancecoin.basePriceEur = parsed.crypto.binancecoin.price; }
+            if(parsed.crypto.bittensor) { p.crypto.bittensor.qty = parsed.crypto.bittensor.qty; if(parsed.crypto.bittensor.price) p.crypto.bittensor.basePriceEur = parsed.crypto.bittensor.price; }
+            if(parsed.crypto['ondo-finance']) { p.crypto['ondo-finance'].qty = parsed.crypto['ondo-finance'].qty; if(parsed.crypto['ondo-finance'].price) p.crypto['ondo-finance'].basePriceEur = parsed.crypto['ondo-finance'].price; }
+        }
+        if(parsed.etf && parsed.etf['msci-world']) { 
+            p.etf['msci-world'].qty = parsed.etf['msci-world'].qty; 
+            if(parsed.etf['msci-world'].price) p.etf['msci-world'].basePriceEur = parsed.etf['msci-world'].price; 
+        }
+        if(parsed.liquidity) {
+            if(parsed.liquidity.eurc !== undefined) p.liquidity.eurc = parsed.liquidity.eurc;
+            if(parsed.liquidity.usdc) { p.liquidity.usdc.qty = parsed.liquidity.usdc.qty; p.liquidity.usdc.basePriceEur = parsed.liquidity.usdc.price; }
+        }
+        if(parsed.fiat) STORICO[STORICO.length - 1].i = parsed.fiat;
+    }
+}
+
+function openAdmin() {
+    const form = document.getElementById('adminForm');
+    const p = CONFIG.PORTFOLIO;
+    const currentFiat = STORICO[STORICO.length - 1].i;
+    
+    // Grafica per doppio input (Qty + Prezzo)
+    const createAssetInput = (id, label, qty, price) => `
+        <div class="admin-form-group" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+            <label style="color:#dce6f2;">${label}</label>
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <div style="flex: 1; display: flex; align-items: center; background: #000; border: 1px solid #333; border-radius: 4px; padding: 0 8px;"><span style="color:#666; font-size:0.8em; margin-right:5px;">Qty</span><input type="number" step="any" id="admin_${id}_qty" value="${qty}" style="background: transparent; border: none; color: #fff; padding: 8px 0; width: 100%; font-family: monospace; outline: none;"></div>
+                <div style="flex: 1; display: flex; align-items: center; background: #000; border: 1px solid #333; border-radius: 4px; padding: 0 8px;"><span style="color:#666; font-size:0.8em; margin-right:5px;">€</span><input type="number" step="any" id="admin_${id}_price" value="${price}" style="background: transparent; border: none; color: #fff; padding: 8px 0; width: 100%; font-family: monospace; outline: none;"></div>
+            </div>
+        </div>`;
+
+    // Grafica per input singolo
+    const createInput = (id, label, val) => `
+        <div class="admin-form-group">
+            <label>${label}</label>
+            <input type="number" step="any" id="admin_${id}" value="${val}" style="background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 4px; font-family: monospace; width: 140px; text-align: right; outline: none;">
+        </div>`;
+        
+    let html = `<div class="admin-section-title">Big Cap & Altcoin</div>`;
+    html += createAssetInput('btc', 'Bitcoin (BTC)', p.crypto.bitcoin.qty, p.crypto.bitcoin.basePriceEur);
+    html += createAssetInput('eth', 'Ethereum (ETH)', p.crypto.ethereum.qty, p.crypto.ethereum.basePriceEur);
+    html += createAssetInput('sol', 'Solana (SOL)', p.crypto.solana.qty, p.crypto.solana.basePriceEur);
+    html += createAssetInput('bnb', 'Binance Coin (BNB)', p.crypto.binancecoin.qty, p.crypto.binancecoin.basePriceEur);
+    html += createAssetInput('tao', 'Bittensor (TAO)', p.crypto.bittensor.qty, p.crypto.bittensor.basePriceEur);
+    html += createAssetInput('ondo', 'Ondo (RWA)', p.crypto['ondo-finance'].qty, p.crypto['ondo-finance'].basePriceEur);
+    
+    html += `<div class="admin-section-title">TradFi & Liquidità</div>`;
+    html += createAssetInput('etf', 'La Roccia (MSCI World)', p.etf['msci-world'].qty, p.etf['msci-world'].basePriceEur);
+    html += createAssetInput('usdc', 'Liquidità Dollari (USDC)', p.liquidity.usdc.qty, p.liquidity.usdc.basePriceEur);
+    html += createInput('liq', 'Liquidità Euro (EURC)', p.liquidity.eurc);
+    
+    html += `<div class="admin-section-title">Iniezione di Capitale</div>`;
+    html += createInput('fiat', 'Net Fiat Immeso (€)', currentFiat);
+    
+    form.innerHTML = html;
+    document.getElementById('adminModal').style.display = 'block';
+}
+
+function closeAdmin() {
+    document.getElementById('adminModal').style.display = 'none';
+}
+
+function saveAdminData() {
+    const p = CONFIG.PORTFOLIO;
+    
+    p.crypto.bitcoin.qty = parseFloat(document.getElementById('admin_btc_qty').value) || 0;
+    p.crypto.bitcoin.basePriceEur = parseFloat(document.getElementById('admin_btc_price').value) || 0;
+    p.crypto.ethereum.qty = parseFloat(document.getElementById('admin_eth_qty').value) || 0;
+    p.crypto.ethereum.basePriceEur = parseFloat(document.getElementById('admin_eth_price').value) || 0;
+    p.crypto.solana.qty = parseFloat(document.getElementById('admin_sol_qty').value) || 0;
+    p.crypto.solana.basePriceEur = parseFloat(document.getElementById('admin_sol_price').value) || 0;
+    p.crypto.binancecoin.qty = parseFloat(document.getElementById('admin_bnb_qty').value) || 0;
+    p.crypto.binancecoin.basePriceEur = parseFloat(document.getElementById('admin_bnb_price').value) || 0;
+    p.crypto.bittensor.qty = parseFloat(document.getElementById('admin_tao_qty').value) || 0;
+    p.crypto.bittensor.basePriceEur = parseFloat(document.getElementById('admin_tao_price').value) || 0;
+    p.crypto['ondo-finance'].qty = parseFloat(document.getElementById('admin_ondo_qty').value) || 0;
+    p.crypto['ondo-finance'].basePriceEur = parseFloat(document.getElementById('admin_ondo_price').value) || 0;
+    p.etf['msci-world'].qty = parseFloat(document.getElementById('admin_etf_qty').value) || 0;
+    p.etf['msci-world'].basePriceEur = parseFloat(document.getElementById('admin_etf_price').value) || 0;
+    
+    p.liquidity.usdc.qty = parseFloat(document.getElementById('admin_usdc_qty').value) || 0;
+    p.liquidity.usdc.basePriceEur = parseFloat(document.getElementById('admin_usdc_price').value) || 0;
+    p.liquidity.eurc = parseFloat(document.getElementById('admin_liq').value) || 0;
+    
+    const newFiat = parseFloat(document.getElementById('admin_fiat').value) || 0;
+    STORICO[STORICO.length - 1].i = newFiat; 
+    
+    const toSave = {
+        crypto: {
+            bitcoin: { qty: p.crypto.bitcoin.qty, price: p.crypto.bitcoin.basePriceEur },
+            ethereum: { qty: p.crypto.ethereum.qty, price: p.crypto.ethereum.basePriceEur },
+            solana: { qty: p.crypto.solana.qty, price: p.crypto.solana.basePriceEur },
+            binancecoin: { qty: p.crypto.binancecoin.qty, price: p.crypto.binancecoin.basePriceEur },
+            bittensor: { qty: p.crypto.bittensor.qty, price: p.crypto.bittensor.basePriceEur },
+            "ondo-finance": { qty: p.crypto['ondo-finance'].qty, price: p.crypto['ondo-finance'].basePriceEur }
+        },
+        etf: { "msci-world": { qty: p.etf['msci-world'].qty, price: p.etf['msci-world'].basePriceEur } },
+        liquidity: { eurc: p.liquidity.eurc, usdc: { qty: p.liquidity.usdc.qty, price: p.liquidity.usdc.basePriceEur } },
+        fiat: newFiat
+    };
+    
+    localStorage.setItem('fortezza_config', JSON.stringify(toSave));
+    
+    closeAdmin();
+    calculateDynamicData(); 
+    
+    const title = document.querySelector('.header-title h1');
+    title.style.color = '#00e676';
+    setTimeout(() => title.style.color = '#ffffff', 1000);
+}
+
+window.onload = () => {
+        loadLocalData(); 
+        const wrapper = document.getElementById('sliderWrapper');
+        if(wrapper) setTimeout(() => wrapper.scrollLeft = wrapper.clientWidth, 50);
+        calculateDynamicData(); 
+        renderHistoryChart("ALL");
+        initLiveEngine(); 
+        setInterval(() => {
+            console.log("🔄 Fortezza: Impulso di aggiornamento automatico...");
+            initLiveEngine();
+        }, 60000); 
+    };
+</script>
 </body>
 </html>
