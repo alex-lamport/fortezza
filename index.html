@@ -701,7 +701,7 @@ async function initLiveEngine() {
 
     // MOTORE 2: ETF via proxy CORS
     try {
-        const etfProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE')}`;
+        const etfProxy = `https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE`;
         const etfRes = await fetch(etfProxy);
         if (!etfRes.ok) throw new Error("ETF proxy down");
         const yahooData = await etfRes.json();
