@@ -716,10 +716,11 @@ const res = await fetch(cryptoUrl);
             const prevClose = meta.chartPreviousClose;
             const etf24hChange = prevClose ? ((liveEtfPrice - prevClose) / prevClose) * 100 : 0;
             livePrices['msci-world'] = { 
-                eur: liveEtfPrice, 
-                eur_24h_change: etf24hChange, 
-                usd_24h_change: etf24hChange 
-            };
+    eur: liveEtfPrice,
+    usd: liveEtfPrice * exchangeRateEurUsd,
+    eur_24h_change: etf24hChange, 
+    usd_24h_change: etf24hChange 
+};
             console.log(`✅ Motore ETF: ${liveEtfPrice}€ via allorigins`);
         } else {
             throw new Error("Dati Yahoo illeggibili");
@@ -727,10 +728,11 @@ const res = await fetch(cryptoUrl);
     } catch (etfErr) {
         console.warn("🟡 Motore ETF Offline:", etfErr.message);
         livePrices['msci-world'] = { 
-            eur: CONFIG.MANUAL_ETF_PRICE, 
-            eur_24h_change: 0, 
-            usd_24h_change: 0 
-        };
+    eur: CONFIG.MANUAL_ETF_PRICE,
+    usd: CONFIG.MANUAL_ETF_PRICE * exchangeRateEurUsd,
+    eur_24h_change: 0, 
+    usd_24h_change: 0 
+};
     }
 
     // ── QUI METTI IL CONTROLLO FINALE ────────────────────────────────
