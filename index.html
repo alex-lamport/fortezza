@@ -679,13 +679,12 @@ document.addEventListener('keydown', function(e) {
 async function initLiveEngine() {
     const ids = 'bitcoin,ethereum,solana,binancecoin,bittensor,ondo-finance,jup-solana,tether,chaingpt,jupiter-exchange-solana,realio-network,spx6900';
     
-    // MOTORE 1: CRYPTO via proxy CORS
+    // MOTORE 1: CRYPTO via proxy allorigins
     try {
-        const proxyUrl = `https://corsproxy.io/?https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true`)}`;
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error(`Errore: ${res.status}`);
         const data = await res.json();
-        if (!data.bitcoin) throw new Error("Dati vuoti");
         livePrices = Object.assign(livePrices, data);
         if (data.tether && data.tether.eur) {
             exchangeRateEurUsd = 1 / data.tether.eur;
@@ -699,9 +698,9 @@ async function initLiveEngine() {
         document.getElementById('liveSignal').style.backgroundColor = "orange";
     }
 
-    // MOTORE 2: ETF via proxy CORS
+    // MOTORE 2: ETF via proxy allorigins
     try {
-        const etfProxy = `https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE`;
+        const etfProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE')}`;
         const etfRes = await fetch(etfProxy);
         if (!etfRes.ok) throw new Error("ETF proxy down");
         const yahooData = await etfRes.json();
