@@ -905,20 +905,29 @@ function calculateDynamicData() {
         }
 
     // --- GESTIONE PRIVACY DEFI MATRIX ---
-    if (isLiveConnected && isMarketView) {
-        document.querySelectorAll('#slide-defi .ticker-usd[data-cg-id]').forEach(el => {
-            const assetId = el.getAttribute('data-cg-id');
-            const qty = parseFloat(el.getAttribute('data-qty'));
-            if (livePrices[assetId]) {
-                const val = qty * livePrices[assetId][cur];
-                el.innerHTML = `Net Value: ${sym} <span class="sensitive-data">${val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
-                el.classList.add('live-value-highlight');
-            }
-        });
-    } else {
-        document.querySelectorAll('#slide-defi .ticker-usd').forEach(el => el.classList.remove('live-value-highlight'));
-    }
-}
+    document.querySelectorAll('#slide-defi .ticker-usd[data-cg-id]').forEach(el => {
+        const assetId = el.getAttribute('data-cg-id');
+        
+        // 1. Rimuove eventuali virgole dal numero per impedire il blocco del calcolo
+        const rawQty = el.getAttribute('data-qty').replace(/,/g, '');
+        const qty = parseFloat(rawQty);
+        
+        // 2. Salva il testo originale (Base Cost) come backup la prima volta
+        if (!el.hasAttribute('data-base-html')) {
+            el.setAttribute('data-base-html', el.innerHTML);
+        }
+
+        if (isLiveConnected && isMarketView && livePrices[assetId]) {
+            // Modo Live
+            const val = qty * livePrices[assetId][cur];
+            el.innerHTML = `Net Value: ${sym} <span class="sensitive-data">${val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;
+            el.classList.add('live-value-highlight');
+        } else {
+            // Modo Punti Zero (o se API Offline): Ripristina il backup esatto
+            el.innerHTML = el.getAttribute('data-base-html');
+            el.classList.remove('live-value-highlight');
+        }
+    });
 
     function updateSalaControllo() {
         const p = CONFIG.PORTFOLIO;
@@ -972,7 +981,8 @@ if (isBasket) {
                 
                 if (isMarketView && isOnline) {
                     changeEl.innerHTML = `<span style="color: ${change24h >= 0 ? '#00e676' : '#ff5252'}; font-family: monospace; font-weight:600;">${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%</span>`;
-                    priceEl.innerHTML = `<span class="live-value-highlight">${isBasket ? 'Avg Index' : sym + ' ' + liveP.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits:4})}</span>`;
+                    let maxDec = asset.type === 'etf' ? 2 : 4;
+                    priceEl.innerHTML = `<span class="live-value-highlight">${isBasket ? 'Avg Index' : sym + ' ' + liveP.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: maxDec})}</span>`;
                     valEl.innerHTML = `<span class="live-value-highlight"><span class="sensitive-data">${sym} ${totalVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
                     
                     if (currentViewMode === 'tgt' && asset.type === 'crypto') {
