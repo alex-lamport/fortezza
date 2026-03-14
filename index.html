@@ -61,8 +61,15 @@
         #viewModeLabel { text-align: center; margin-bottom: 30px; color: #888; font-size: 0.95em; padding: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border: 1px dashed #333; display: flex; justify-content: center; align-items: center; gap: 10px; }
         #viewModeLabel strong { color: #fff; letter-spacing: 0.5px; }
         
-        .live-indicator { width: 8px; height: 8px; background-color: #00e676; border-radius: 50%; box-shadow: 0 0 8px #00e676; display: none; animation: pulseLive 2s infinite; }
-        @keyframes pulseLive { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .live-indicator { 
+    width: 8px; 
+    height: 8px; 
+    background-color: #333; /* Grigio se spento */
+    border-radius: 50%; 
+    box-shadow: 0 0 8px #00e676; 
+    display: block; /* SEMPRE VISIBILE */
+    animation: pulseLive 2s infinite; 
+}
 
         .charts-wrapper { display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 50px; gap: 20px; }
         .chart-container { width: 450px; text-align: center; background: #151515; padding: 30px; border-radius: 12px; border: 1px solid #222; position: relative; transition: all 0.5s ease; min-height: 420px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
@@ -1872,17 +1879,14 @@ function saveAdminData() {
 }
 
 window.onload = () => {
-        loadLocalData(); 
-        const wrapper = document.getElementById('sliderWrapper');
-        if(wrapper) setTimeout(() => wrapper.scrollLeft = wrapper.clientWidth, 50);
-        calculateDynamicData(); 
-        renderHistoryChart("ALL");
-        initLiveEngine(); 
-        setInterval(() => {
-            console.log("🔄 Fortezza: Impulso di aggiornamento automatico...");
-            initLiveEngine();
-        }, 60000); 
-    };
+    loadLocalData(); 
+    calculateDynamicData(); 
+    renderHistoryChart("ALL");
+    initLiveEngine(); 
+    setInterval(() => {
+        initLiveEngine();
+    }, 60000);  // RIGA DELLO SCROLL ELIMINATA: ora il grafico resta al centro
+};
 </script>
 </body>
 </html>
