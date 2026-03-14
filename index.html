@@ -1285,20 +1285,24 @@ marketBtn.addEventListener('click', () => {
     }
 
     // --- MODIFICA PRIVACY TOOLTIP GRAFICI ---
-    const opsecTooltip = {
+   const opsecTooltip = {
         callbacks: {
             title: () => null, 
             label: function(context) {
-                let sum = context.dataset.data.reduce((a, b) => a + b, 0);
+                let sum = context.dataset.data.reduce((a, b) => a + b, 0); 
                 let percentage = ((context.raw / sum) * 100).toFixed(1) + '%';
                 
-                // Se la privacy è ON, nasconde i soldi ma lascia la percentuale
-                if (document.body.classList.contains('privacy-on')) {
-                    return `${context.label} | █ █ █ (${percentage})`;
+                if (document.body.classList.contains('privacy-on')) { 
+                    return `${context.label} | █ █ █ (${percentage})`; 
+                }
+
+                // Seleziona l'ETF (Index 0): mostra solo la percentuale
+                if (typeof activeMacroIndex !== 'undefined' && activeMacroIndex === 0) {
+                    return `${context.label} | ${percentage}`;
                 }
                 
-                let val = parseFloat(context.raw).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-                let sym = currentCurrency === 'usd' ? '$' : '€';
+                let val = parseFloat(context.raw).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); 
+                let sym = currentCurrency === 'usd' ? '$' : '€'; 
                 return `${context.label} | ${sym}${val} (${percentage})`;
             }
         }
@@ -1340,10 +1344,8 @@ marketBtn.addEventListener('click', () => {
         1: { 
             title: 'Liquidità (Il Paracadute)',
             labels: ['Kamino (USDG)', 'Jupiter Lend (EURC)', 'Sail Money (EURC)', 'Loopscale (ONyc)', 'Carrot (ONyc)'],
-            dataBase: [1000, 1450, 1450, 1000, 900], dataMarket: [1000, 1450, 1450, 1000, 900],
-            getGradients: (ctx, area) => [
-                makeGrad(ctx, area, '#2b2b36', '#3f3f4e'), makeGrad(ctx, area, '#3f3f4e', '#595968'), makeGrad(ctx, area, '#595968', '#78788c'), makeGrad(ctx, area, '#78788c', '#9a9ab0'), makeGrad(ctx, area, '#9a9ab0', '#c2c2d6')
-            ]
+            dataBase: [3900, 5655, 5655, 3900, 3510], dataMarket: [3900, 5655, 5655, 3900, 3510],
+            getGradients: (ctx, area) => [ makeGrad(ctx, area, '#2b2b36', '#3f3f4e'), makeGrad(ctx, area, '#3f3f4e', '#595968'), makeGrad(ctx, area, '#595968', '#78788c'), makeGrad(ctx, area, '#78788c', '#9a9ab0'), makeGrad(ctx, area, '#9a9ab0', '#c2c2d6') ] 
         },
 2: { 
             title: 'Scomposizione Crypto (AI & RWA)',
