@@ -27,7 +27,7 @@ This terminal is built to decode those on-chain flows and manage exposure dynami
 - **Data Feeds**: Asynchronous API integration (CoinGecko for Web3, Yahoo Finance for TradFi via proxy).
 
 ## Quick Start
-1. Clone the repo: `git clone (https://github.com/alex-lamport/fortezza.git)`
+1. Clone the repo: git clone [https://github.com/alexlamports/fortezza-dashboard.git](https://github.com/alex-lamport/fortezza.git)
 2. Open `index.html` in your browser.
 3. Explore the dashboard: Toggle views, activate Privacy Blur, and use Konami Code for the admin terminal.
 
