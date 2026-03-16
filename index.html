@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architettura della Fortezza - Alex | Flow Architect</title>
+    <title>The Fortress Architecture - Alex | Flow Architect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-    // OPSEC: Nessuna API Key esposta.
+    // OPSEC: No API Keys exposed.
     const CONFIG = {
         MANUAL_ETF_PRICE: 113.00, 
         PORTFOLIO: {
@@ -64,10 +64,10 @@
         .live-indicator { 
     width: 8px; 
     height: 8px; 
-    background-color: #333; /* Grigio se spento */
+    background-color: #333; 
     border-radius: 50%; 
     box-shadow: 0 0 8px #00e676; 
-    display: block; /* SEMPRE VISIBILE */
+    display: block; 
     animation: pulseLive 2s infinite; 
 }
 
@@ -250,20 +250,20 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
 <div id="adminModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>TERMINALE OPERATIVO</h2>
+            <h2>OPERATIONAL TERMINAL</h2>
             <span class="close-modal" onclick="closeAdmin()">&times;</span>
         </div>
         <div id="adminForm">
             </div>
-        <button class="admin-btn" onclick="saveAdminData()">Sincronizza Matrice</button>
+        <button class="admin-btn" onclick="saveAdminData()">Sync Matrix</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
         <div class="header-title">
-            <h1>Architettura della Fortezza</h1>
-            <p>Protocollo Operativo di Gestione e Analisi On-Chain | Flow Architect</p>
+            <h1>The Fortress Architecture</h1>
+            <p>On-Chain Management & Analysis Operational Protocol | Flow Architect</p>
             </div>
        <div class="controls-wrapper">
             <div id="forexDisplay" style="color: #666; font-size: 0.85em; font-family: monospace; display: flex; align-items: center; padding-right: 10px; border-right: 1px solid #333;">1€ = $1.080</div>
@@ -280,13 +280,13 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
 
     <div id="viewModeLabel">
         <div id="liveSignal" class="live-indicator"></div>
-        <span id="viewModeText">Visualizzazione attuale: <strong>Base di Costo (Punti Zero)</strong></span>
+        <span id="viewModeText">Current View: <strong>Cost Basis (Zero Points)</strong></span>
     </div>
 
     <div class="charts-wrapper">
         <div class="chart-container">
             <h3 style="position: relative; z-index: 10;">
-                Asset Allocation Macro
+                Macro Asset Allocation
                 <span class="micro-switch-group">
                     [<span class="micro-switch active-switch inactive" id="btn-macro-chart" onclick="switchMacroView('chart')">CHART</span>|<span class="micro-switch inactive" id="btn-macro-tgt" onclick="switchMacroView('tgt')">TGT</span>]
                 </span>
@@ -299,14 +299,14 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
             <div id="macroTgtWrapper" class="chart-layer">
                 <div class="macro-tgt-row">
                     <div class="macro-tgt-header">
-                        <span class="macro-tgt-title" style="color: #3a7bd5;">La Roccia (ETF)</span>
+                        <span class="macro-tgt-title" style="color: #3a7bd5;">The Rock (ETF)</span>
                         <span class="macro-tgt-numbers" id="macro-tgt-etf-num">--% / 33.33%</span>
                     </div>
                     <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-etf-bar"></div></div>
                 </div>
                 <div class="macro-tgt-row">
                     <div class="macro-tgt-header">
-                        <span class="macro-tgt-title" style="color: #78788c;">Paracadute (Liquidità)</span>
+                        <span class="macro-tgt-title" style="color: #78788c;">The Parachute (Liquidity)</span>
                         <span class="macro-tgt-numbers" id="macro-tgt-liq-num">--% / 33.33%</span>
                     </div>
                     <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-liq-bar"></div></div>
@@ -330,7 +330,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
         </div>
         
         <div class="chart-container" id="detailChartContainer">
-            <h3 id="detailChartTitle">Terminale in Attesa...</h3>
+            <h3 id="detailChartTitle">Terminal Standby...</h3>
             <canvas id="detailChart"></canvas>
         </div>
     </div>
@@ -339,7 +339,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
         <div class="table-title-group">
             <h3 class="table-title" id="dynamicTableTitle">Portfolio History</h3>
             <div class="legend-wrapper" id="dynamicSubtitle" style="transition: opacity 0.2s ease;">
-                <span class="legend-text">Analisi Forense | Net Fiat vs PnL Globale</span>
+                <span class="legend-text">Forensic Analysis | Net Fiat vs Global PnL</span>
             </div>
         </div>
 
@@ -384,10 +384,10 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                     <thead>
                         <tr>
                             <th class="sortable-header" onclick="handleSort('asset')" style="width: 19%;">Asset</th>
-                            <th style="width: 11%;">Quantità</th>
-                            <th class="sortable-header" onclick="handleSort('price')" style="width: 20%;">Prezzo (Live / BE)</th>
+                            <th style="width: 11%;">Quantity</th>
+                            <th class="sortable-header" onclick="handleSort('price')" style="width: 20%;">Price (Live / BE)</th>
                             <th class="sortable-header" onclick="handleSort('24h')" style="width: 14%;">24H (%)</th>
-                            <th class="sortable-header" onclick="handleSort('capital')" style="width: 18%;">Capitale (Valore / Speso)</th>
+                            <th class="sortable-header" onclick="handleSort('capital')" style="width: 18%;">Capital (Value / Invested)</th>
                             <th style="width: 18%; text-align: center;">
                                 PnL & Status <br>
                                 <span class="micro-switch-group">
@@ -403,7 +403,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td><div class="ticker-val" id="price-bitcoin">--</div></td>
                             <td><div class="ticker-val" id="change-bitcoin">--</div></td>
                             <td><div class="ticker-usd" id="val-bitcoin">--</div></td>
-                            <td id="col6-bitcoin"><span class="badge" id="status-bitcoin">In attesa...</span></td>
+                            <td id="col6-bitcoin"><span class="badge" id="status-bitcoin">Pending...</span></td>
                         </tr>
                         <tr data-id="ethereum">
                             <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/279/standard/ethereum.png" class="crypto-icon"> Ethereum (ETH)</div></td>
@@ -411,7 +411,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td><div class="ticker-val" id="price-ethereum">--</div></td>
                             <td><div class="ticker-val" id="change-ethereum">--</div></td>
                             <td><div class="ticker-usd" id="val-ethereum">--</div></td>
-                            <td id="col6-ethereum"><span class="badge" id="status-ethereum">In attesa...</span></td>
+                            <td id="col6-ethereum"><span class="badge" id="status-ethereum">Pending...</span></td>
                         </tr>
                         <tr data-id="solana">
                             <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/4128/standard/solana.png" class="crypto-icon"> Solana (SOL)</div></td>
@@ -419,7 +419,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td><div class="ticker-val" id="price-solana">--</div></td>
                             <td><div class="ticker-val" id="change-solana">--</div></td>
                             <td><div class="ticker-usd" id="val-solana">--</div></td>
-                            <td id="col6-solana"><span class="badge" id="status-solana">In attesa...</span></td>
+                            <td id="col6-solana"><span class="badge" id="status-solana">Pending...</span></td>
                         </tr>
                         <tr data-id="binancecoin">
                             <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png" class="crypto-icon"> Binance Coin (BNB)</div></td>
@@ -427,7 +427,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td><div class="ticker-val" id="price-binancecoin">--</div></td>
                             <td><div class="ticker-val" id="change-binancecoin">--</div></td>
                             <td><div class="ticker-usd" id="val-binancecoin">--</div></td>
-                            <td id="col6-binancecoin"><span class="badge" id="status-binancecoin">In attesa...</span></td>
+                            <td id="col6-binancecoin"><span class="badge" id="status-binancecoin">Pending...</span></td>
                         </tr>
                         <tr data-id="bittensor">
                             <td><div class="protocol-name"><div class="crypto-icon" style="width: 16px; height: 16px; border-radius: 50%; background-image: url('https://assets.coingecko.com/coins/images/28452/standard/ARUsPeNQ_400x400.jpeg'); background-size: 200%; background-position: center; flex-shrink: 0;"></div> Bittensor (TAO)</div></td>
@@ -435,7 +435,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td><div class="ticker-val" id="price-bittensor">--</div></td>
                             <td><div class="ticker-val" id="change-bittensor">--</div></td>
                             <td><div class="ticker-usd" id="val-bittensor">--</div></td>
-                            <td id="col6-bittensor"><span class="badge" id="status-bittensor">In attesa...</span></td>
+                            <td id="col6-bittensor"><span class="badge" id="status-bittensor">Pending...</span></td>
                         </tr>
                        <tr data-id="ondo-finance">
     <td><div class="protocol-name"><img src="https://assets.coingecko.com/coins/images/26580/standard/ONDO.png" class="crypto-icon invert-logo"> Ondo Finance (RWA)</div></td>
@@ -443,7 +443,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
     <td><div class="ticker-val" id="price-ondo-finance">--</div></td>
     <td><div class="ticker-val" id="change-ondo-finance">--</div></td>
     <td><div class="ticker-usd" id="val-ondo-finance">--</div></td>
-    <td id="col6-ondo-finance"><span class="badge" id="status-ondo-finance">In attesa...</span></td>
+    <td id="col6-ondo-finance"><span class="badge" id="status-ondo-finance">Pending...</span></td>
 </tr>
                         <tr data-id="low-cap-index">
                             <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #b0bec5;"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg> Low Cap Index</div></td>
@@ -451,15 +451,15 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td><div class="ticker-val" id="price-low-cap-index">--</div></td>
                             <td><div class="ticker-val" id="change-low-cap-index">--</div></td>
                             <td><div class="ticker-usd" id="val-low-cap-index">--</div></td>
-                            <td id="col6-low-cap-index"><span class="badge" id="status-low-cap-index">In attesa...</span></td>
+                            <td id="col6-low-cap-index"><span class="badge" id="status-low-cap-index">Pending...</span></td>
                         </tr>
                         <tr data-id="msci-world">
-                            <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #4fc3f7;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> La Roccia (EUNL)</div></td>
+                            <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #4fc3f7;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> The Rock (EUNL)</div></td>
                             <td><div class="qty-cell" id="qty-msci-world">--</div></td>
                             <td><div class="ticker-val" id="price-msci-world">--</div></td>
                             <td><div class="ticker-val" id="change-msci-world">--</div></td>
                             <td><div class="ticker-usd" id="val-msci-world">--</div></td>
-                            <td id="col6-msci-world"><span class="badge" id="status-msci-world">In attesa...</span></td>
+                            <td id="col6-msci-world"><span class="badge" id="status-msci-world">Pending...</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -469,10 +469,10 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 20%;">Protocollo</th>
-                            <th style="width: 20%;">Ticker & Capitale</th>
-                            <th style="width: 20%;">Performance & Rischio</th>
-                            <th style="width: 40%;">Outlook Operativo (Flow Architect)</th>
+                            <th style="width: 20%;">Protocol</th>
+                            <th style="width: 20%;">Ticker & Capital</th>
+                            <th style="width: 20%;">Performance & Risk</th>
+                            <th style="width: 40%;">Operational Outlook (Flow Architect)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -490,11 +490,11 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.08</span></div>
-                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">83.4%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">6.20x</span>)</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">83.4%</span> <span style="color:#666; font-size:0.9em;">(Lev: <span style="color:#dce6f2; font-weight:600;">6.20x</span>)</span></div>
                                 <div style="margin-top: 6px;">Health: <span class="badge safe">12.22%</span></div>
                                 <div class="health-bar-container"><div class="health-bar safe" style="width: 24.44%"></div></div> 
                             </td>
-                            <td>Gestione chirurgica del collaterale. Strategia di accumulo yield ottimizzata su Solana con monitoraggio millimetrico del peg e della solvibilità dello smart contract.</td>
+                            <td>Surgical collateral management. Optimized yield accumulation strategy on Solana with millimeter-precise monitoring of the peg and smart contract solvency.</td>
                         </tr>
                         <tr>
                             <td>
@@ -510,11 +510,11 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.04</span></div>
-                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">85.2%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">7.10x</span>)</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">85.2%</span> <span style="color:#666; font-size:0.9em;">(Lev: <span style="color:#dce6f2; font-weight:600;">7.10x</span>)</span></div>
                                 <div style="margin-top: 6px;">Health: <span class="badge warning">10.31%</span></div>
                                 <div class="health-bar-container"><div class="health-bar warning" style="width: 20.62%"></div></div> 
                             </td>
-                            <td>Saturazione dell'efficienza del capitale tramite leva calcolata. Posizionamento tattico per massimizzare il ritorno sul capitale nel breve periodo.</td>
+                            <td>Capital efficiency saturation via calculated leverage. Tactical positioning to maximize short-term return on capital.</td>
                         </tr>
                         <tr>
                             <td>
@@ -530,11 +530,11 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.12</span></div>
-                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="critical">89.5%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">10.01x</span>)</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="critical">89.5%</span> <span style="color:#666; font-size:0.9em;">(Lev: <span style="color:#dce6f2; font-weight:600;">10.01x</span>)</span></div>
                                 <div style="margin-top: 6px;">Health: <span class="badge critical">5.73%</span></div>
                                 <div class="health-bar-container"><div class="health-bar critical" style="width: 11.46%"></div></div> 
                             </td>
-                            <td>Posizione aggressiva mirata all'accumulo massivo di rewards. Rischio di de-peg monitorato in tempo reale.</td>
+                            <td>Aggressive position aimed at massive rewards accumulation. Real-time de-peg risk monitoring.</td>
                         </tr>
                         <tr>
                             <td>
@@ -550,11 +550,11 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="safe">0.00</span></div>
-                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="safe">68.5%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">3.90x</span>)</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="safe">68.5%</span> <span style="color:#666; font-size:0.9em;">(Lev: <span style="color:#dce6f2; font-weight:600;">3.90x</span>)</span></div>
                                 <div style="margin-top: 6px;">Health: <span class="badge safe">19.20%</span></div>
                                 <div class="health-bar-container"><div class="health-bar safe" style="width: 38.40%"></div></div> 
                             </td>
-                            <td>RWA in collaterale per estrazione liquidità. Ancorato per ottimizzare l'efficienza senza esposizione alla volatilità.</td>
+                            <td>RWA in collateral for liquidity extraction. Anchored to optimize efficiency without volatility exposure.</td>
                         </tr>
                         <tr>
                             <td>
@@ -567,15 +567,15 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="safe">0.00</span></div>
-                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="safe">70.8%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">3.42x</span>)</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="safe">70.8%</span> <span style="color:#666; font-size:0.9em;">(Lev: <span style="color:#dce6f2; font-weight:600;">3.42x</span>)</span></div>
                                 <div style="margin-top: 6px;">Health: <span class="badge safe">18.00%</span></div>
                                 <div class="health-bar-container"><div class="health-bar safe" style="width: 36.00%"></div></div>
                             </td>
                             <td>
-                                Esposizione tattica sui Real World Assets. Accumulo attivo (Season 3).<br>
+                                Tactical exposure on Real World Assets. Active accumulation (Season 3).<br>
                                 <a href="https://x.com/alex_lamports/status/2028298584081289660?s=20" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 4px 12px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-decoration: none; font-size: 0.85em; font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.boxShadow='0 0 12px rgba(255,255,255,0.4)'; this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='none'; this.style.background='rgba(255, 255, 255, 0.05)'; this.style.transform='translateY(0)';">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                    Analisi Forense On-Chain
+                                    On-Chain Forensic Analysis
                                 </a>
                             </td>
                         </tr>
@@ -590,11 +590,11 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="critical">-3.98</span></div>
-                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">88.9%</span> <span style="color:#666; font-size:0.9em;">(Leva: <span style="color:#dce6f2; font-weight:600;">9.03x</span>)</span></div>
+                                <div style="font-family: monospace; color: #aaa; margin-top: 2px;">LTV: <span class="warning">88.9%</span> <span style="color:#666; font-size:0.9em;">(Lev: <span style="color:#dce6f2; font-weight:600;">9.03x</span>)</span></div>
                                 <div style="margin-top: 6px;">Health: <span class="badge warning">10.60%</span></div>
                                 <div class="health-bar-container"><div class="health-bar warning" style="width: 21.20%"></div></div>
                             </td>
-                            <td>Yield farming su stable-loop per annullare il rischio volatilità. LTV in zona sicura grazie al peg valutario.</td>
+                            <td>Yield farming on stable-loop to negate volatility risk. LTV in safe zone thanks to currency peg.</td>
                         </tr>
                         <tr>
                             <td>
@@ -603,13 +603,13 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div class="ticker-val"><img src="img/eurc.png" class="crypto-icon" onerror="this.src='https://assets.coingecko.com/coins/images/26040/standard/EURC.png'"> <span class="sensitive-data">5,667.95</span> EURC</div>
-                                <div class="ticker-usd">Liquidità Nativa</div>
+                                <div class="ticker-usd">Native Liquidity</div>
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+3.86</span></div>
-                                <div style="margin-top: 8px;">Stato: <span class="badge safe">Safe (Paracadute)</span></div>
+                                <div style="margin-top: 8px;">Status: <span class="badge safe">Safe (Parachute)</span></div>
                             </td>
-                            <td>Riserva Strategica di Collaterale pronta per interventi rapidi on-chain.</td>
+                            <td>Strategic Collateral Reserve ready for rapid on-chain interventions.</td>
                         </tr>
                         <tr>
                             <td>
@@ -622,9 +622,9 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             </td>
                             <td>
                                 <div style="font-family: monospace; color: #aaa;">Delta: <span class="highlight">+0.62</span></div>
-                                <div style="margin-top: 8px;">Stato: <span class="badge safe">Safe (AI Agent)</span></div>
+                                <div style="margin-top: 8px;">Status: <span class="badge safe">Safe (AI Agent)</span></div>
                             </td>
-                            <td>Sperimentazione attiva dell'automazione on-chain. L'agente IA ribilancia dinamicamente in cerca del best yield.</td>
+                            <td>Active experimentation of on-chain automation. The AI agent dynamically rebalances seeking the best yield.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -638,12 +638,12 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
     </div>
     <div class="footer-wrapper">
         <div class="footer-note">
-            <strong>Nota dell'Architetto</strong>
-            L'estrazione quantitativa del dato è solo metà del lavoro. Questa architettura è costruita seguendo i principi della <em>Neuro-Etica della Sensibilità</em>: il monitoraggio forense dei flussi non è solo numerico, ma serve a decodificare la matrice comportamentale che muove i capitali on-chain.
+            <strong>Architect's Note</strong>
+            Quantitative data extraction is only half the work. This architecture is built following the principles of the <em>Neuro-Ethics of Sensitivity</em>: the forensic monitoring of flows is not just numerical, but serves to decode the behavioral matrix that moves on-chain capital.
         </div>
         <div class="due-diligence">
             * On-Chain Verification and Wallet Address details are strictly maintained under secure OpSec protocols.<br>
-            <a href="https://x.com/alex_lamports" target="_blank" style="color: #00e5ff; text-decoration: none; margin-top: 8px; display: inline-block; border: 1px solid rgba(0, 229, 255, 0.3); padding: 4px 12px; border-radius: 4px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(0, 229, 255, 0.1)'" onmouseout="this.style.background='transparent'">📡 Segui l'Architetto su X (Twitter)</a>
+            <a href="https://x.com/alex_lamports" target="_blank" style="color: #00e5ff; text-decoration: none; margin-top: 8px; display: inline-block; border: 1px solid rgba(0, 229, 255, 0.3); padding: 4px 12px; border-radius: 4px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(0, 229, 255, 0.1)'" onmouseout="this.style.background='transparent'">📡 Follow the Architect on X (Twitter)</a>
         </div>
     </div>
 </div>
@@ -741,7 +741,7 @@ const res = await fetch(cryptoUrl);
         msg.style.color = '#ff5252';
         msg.style.fontSize = '0.85em';
         msg.style.marginLeft = '10px';
-        msg.innerText = 'API offline – usando prezzi manuali/base';
+        msg.innerText = 'API offline – using manual/base prices';
         document.getElementById('viewModeLabel').appendChild(msg);
     }
 
@@ -992,7 +992,7 @@ function calculateDynamicData() {
                         const t = p.crypto[asset.id].target;
                         const c = (totalVal / currentTotalCryptoValue) * 100;
                         const d = c - t;
-                        col6El.innerHTML = `<span class="tgt-text">Att: <span class="sensitive-data">${c.toFixed(1)}%</span> / Tgt: ${t}%</span>
+                        col6El.innerHTML = `<span class="tgt-text">Cur: <span class="sensitive-data">${c.toFixed(1)}%</span> / Tgt: ${t}%</span>
                                             <div class="tgt-bar-container"><div class="tgt-bar-fill ${d >= 0 ? 'over' : 'under'}" style="width: ${Math.min(Math.abs(d) * 5, 50)}%;"></div></div>`;
                     } else if (currentViewMode === 'tgt' && asset.type === 'etf') {
                         col6El.innerHTML = `<span class="badge spento">N/A</span>`;
@@ -1014,7 +1014,7 @@ function calculateDynamicData() {
                     let prezzoMostrato = isBasket ? 'Basket Index' : sym + (cur === 'usd' ? baseCostEur * exchangeRateEurUsd : baseCostEur).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     priceEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${prezzoMostrato}</span> <span style="font-size: 0.7em; color: #555; font-family: monospace;">(Entry)</span></span>`;
                     valEl.innerHTML = `<span class="historical-value"><span class="sensitive-data">${sym}${investedCapital.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></span>`;
-                    col6El.innerHTML = `<span class="badge spento">Punto Zero</span>`;
+                    col6El.innerHTML = `<span class="badge spento">Zero Point</span>`;
                 }
             }
         });
@@ -1193,13 +1193,13 @@ function calculateDynamicData() {
                 d.classList.toggle('active', i === slideIndex);
             });
 
-            const titles = ["Portfolio History", "Sala Controllo (Ticker Live)", "Matrice dei Protocolli DeFi"];
+            const titles = ["Portfolio History", "Control Room (Live Tickers)", "DeFi Protocol Matrix"];
             
             // Qui definiamo i tre sottotitoli esatti (il terzo mantiene il testo originale con il pallino)
             const subtitles = [
-                `<span class="legend-text">Analisi Forense | Net Fiat vs PnL Globale</span>`,
-                `<span class="legend-text">Sorveglianza Asset | Target e Ribilanciamento</span>`,
-                `<div class="legend-dot-static"></div><span class="legend-text">Rewards Attive | Monitoraggio Flussi On-Chain</span>`
+                `<span class="legend-text">Forensic Analysis | Net Fiat vs Global PnL</span>`,
+                `<span class="legend-text">Asset Surveillance | Targets & Rebalancing</span>`,
+                `<div class="legend-dot-static"></div><span class="legend-text">Active Rewards | On-Chain Flow Monitoring</span>`
             ];
 
             tableTitle.textContent = titles[slideIndex] || titles[0];
@@ -1260,10 +1260,10 @@ marketBtn.addEventListener('click', () => {
 
         if(isMarketView) {
             marketBtn.classList.add('active');
-            viewModeText.innerHTML = `Visualizzazione attuale: <strong>Potenza di Mercato (Live API)</strong>`;
+            viewModeText.innerHTML = `Current View: <strong>Market Power (Live API)</strong>`;
         } else {
             marketBtn.classList.remove('active');
-            viewModeText.innerHTML = `Visualizzazione attuale: <strong>Base di Costo (Punti Zero)</strong>`;
+            viewModeText.innerHTML = `Current View: <strong>Cost Basis (Zero Points)</strong>`;
         }
 
         // --- SINCRONIZZAZIONE GRAFICO STORICO ---
@@ -1334,21 +1334,21 @@ marketBtn.addEventListener('click', () => {
 
     const detailConfig = {
         0: { 
-            title: 'ETF Settoriale (MSCI World)',
-            labels: ['Tech', 'Financials', 'Industrials', 'Cons. Discretionary', 'Health Care', 'Comm Services', 'Altri Settori'],
+            title: 'Sector ETF (MSCI World)',
+            labels: ['Tech', 'Financials', 'Industrials', 'Cons. Discretionary', 'Health Care', 'Comm Services', 'Other Sectors'],
             dataBase: [26.2, 16.74, 11.61, 9.82, 9.66, 8.98, 17.0], dataMarket: [26.2, 16.74, 11.61, 9.82, 9.66, 8.98, 17.0], 
             getGradients: (ctx, area) => [
                 makeGrad(ctx, area, '#03045e', '#023e8a'), makeGrad(ctx, area, '#023e8a', '#0077b6'), makeGrad(ctx, area, '#0077b6', '#0096c7'), makeGrad(ctx, area, '#0096c7', '#00b4d8'), makeGrad(ctx, area, '#00b4d8', '#48cae4'), makeGrad(ctx, area, '#48cae4', '#90e0ef'), makeGrad(ctx, area, '#90e0ef', '#caf0f8')
             ]
         },
         1: { 
-            title: 'Liquidità (Il Paracadute)',
+            title: 'Liquidity (The Parachute)',
             labels: ['Kamino (USDG)', 'Jupiter Lend (EURC)', 'Sail Money (EURC)', 'Loopscale (ONyc)', 'Carrot (ONyc)'],
             dataBase: [3900, 5655, 5655, 3900, 3510], dataMarket: [3900, 5655, 5655, 3900, 3510],
             getGradients: (ctx, area) => [ makeGrad(ctx, area, '#2b2b36', '#3f3f4e'), makeGrad(ctx, area, '#3f3f4e', '#595968'), makeGrad(ctx, area, '#595968', '#78788c'), makeGrad(ctx, area, '#78788c', '#9a9ab0'), makeGrad(ctx, area, '#9a9ab0', '#c2c2d6') ] 
         },
 2: { 
-            title: 'Scomposizione Crypto (AI & RWA)',
+            title: 'Crypto Breakdown (AI & RWA)',
             labels: ['BTC', 'ETH', 'SOL', 'BNB', 'TAO (AI)', 'ONDO (RWA)', 'Low Cap Index'],
             dataBase: [], dataMarket: [], 
             getGradients: (ctx, area) => [
@@ -1370,7 +1370,7 @@ marketBtn.addEventListener('click', () => {
     const macroChart = new Chart(ctxMacro, {
         type: 'doughnut',
         data: {
-            labels: ['La Roccia (ETF)', 'Il Paracadute (Liquidità)', 'Crypto (Big Cap & Alt)'],
+            labels: ['The Rock (ETF)', 'The Parachute (Liquidity)', 'Crypto (Big Cap & Alt)'],
             datasets: [{
                 data: [33, 33, 33], 
                 backgroundColor: function(context) {
@@ -1649,7 +1649,7 @@ function renderHistoryChart(tf = "ALL") {
                         heroEl.style.textShadow = 'none';
                         
                         if (subEl) {
-                            subEl.innerHTML = `<span style="color:#aaa;">[${pt.d}]</span> ↳ Capitale Immeso (Net Fiat Storico)`;
+                            subEl.innerHTML = `<span style="color:#aaa;">[${pt.d}]</span> ↳ Invested Capital (Historic Net Fiat)`;
                         }
                     }
                 }
@@ -1818,13 +1818,13 @@ function openAdmin() {
     html += createAssetInput('tao', 'Bittensor (TAO)', p.crypto.bittensor.qty, p.crypto.bittensor.basePriceEur);
     html += createAssetInput('ondo', 'Ondo (RWA)', p.crypto['ondo-finance'].qty, p.crypto['ondo-finance'].basePriceEur);
     
-    html += `<div class="admin-section-title">TradFi & Liquidità</div>`;
-    html += createAssetInput('etf', 'La Roccia (MSCI World)', p.etf['msci-world'].qty, p.etf['msci-world'].basePriceEur);
-    html += createAssetInput('usdc', 'Liquidità Dollari (USDC)', p.liquidity.usdc.qty, p.liquidity.usdc.basePriceEur);
-    html += createInput('liq', 'Liquidità Euro (EURC)', p.liquidity.eurc);
+    html += `<div class="admin-section-title">TradFi & Liquidity</div>`;
+    html += createAssetInput('etf', 'The Rock (MSCI World)', p.etf['msci-world'].qty, p.etf['msci-world'].basePriceEur);
+    html += createAssetInput('usdc', 'Dollar Liquidity (USDC)', p.liquidity.usdc.qty, p.liquidity.usdc.basePriceEur);
+    html += createInput('liq', 'Euro Liquidity (EURC)', p.liquidity.eurc);
     
-    html += `<div class="admin-section-title">Iniezione di Capitale</div>`;
-    html += createInput('fiat', 'Net Fiat Immeso (€)', currentFiat);
+    html += `<div class="admin-section-title">Capital Injection</div>`;
+    html += createInput('fiat', 'Net Fiat Invested (€)', currentFiat);
     
     form.innerHTML = html;
     document.getElementById('adminModal').style.display = 'block';
@@ -1890,7 +1890,7 @@ window.onload = () => {
     initLiveEngine(); 
     setInterval(() => {
         initLiveEngine();
-    }, 60000);  // RIGA DELLO SCROLL ELIMINATA: ora il grafico resta al centro
+    }, 60000); 
 };
 </script>
 </body>
