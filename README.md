@@ -10,7 +10,7 @@
 ## 👁️ Vision & Philosophy
 This terminal is not just a portfolio tracker; it is the quantitative extraction of a behavioral framework. 
 
-Markets are not just numbers; they are psychology translated into flows. The core philosophy behind this architecture is that **analytical sensitivity is an edge**. Human behavioral patterns work similarly to the **Tornado Cash** protocol: the output is visible and powerful, but the internal routing is impossible to trace and judge from the outside. 
+Markets are not just numbers; they are psychology translated into flows. The core philosophy behind this architecture is that **analytical sensitivity is an edge**. Human behavioral patterns work similarly to a mixer protocol: the output is visible and powerful, but the internal routing is impossible to trace and judge from the outside. 
 
 This terminal is built to decode those on-chain flows and manage exposure dynamically.
 
