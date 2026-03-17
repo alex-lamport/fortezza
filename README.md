@@ -3,7 +3,7 @@
 
 *Built with AI as a cognitive exoskeleton. Driven by Behavioral Pattern Recognition.*
 
-![Fortress Dashboard Screenshot](img/Screenshot.png)  
+![Fortress Dashboard Screenshot](img/Screenshot.png)![Fortress Dashboard Screenshot](img/info.png)  
 
 ---
 
