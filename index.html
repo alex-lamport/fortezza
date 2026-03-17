@@ -233,7 +233,20 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
         .admin-btn { width: 100%; background: rgba(0, 229, 255, 0.05); border: 1px solid #00e5ff; color: #00e5ff; padding: 15px; font-weight: bold; letter-spacing: 2px; cursor: pointer; border-radius: 6px; margin-top: 25px; transition: all 0.3s; text-transform: uppercase;}
         .admin-btn:hover { background: #00e5ff; color: #000; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
         .admin-section-title { color: #666; font-size: 0.7em; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0 10px 0; border-bottom: 1px dashed #222; padding-bottom: 5px;}
-        
+        /* ── INFO MODAL & BUTTON ── */
+        .info-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; }
+        .info-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .info-card { background: #0d0d0d; border: 1px solid #333; border-radius: 12px; width: 90%; max-width: 600px; padding: 35px; box-shadow: 0 0 50px rgba(0,229,255,0.15); position: relative; color: #e0e0e0; }
+        .info-card h2 { margin-top: 0; color: #00e5ff; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 1.2em; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px;}
+        .info-close { position: absolute; top: 20px; right: 25px; background: none; border: none; color: #666; font-size: 28px; cursor: pointer; transition: color 0.2s; line-height: 1; }
+        .info-close:hover { color: #ff5252; }
+        .info-section { margin-bottom: 20px; line-height: 1.6; font-size: 0.9em; }
+        .info-section strong { color: #fff; font-weight: 600; }
+        .info-list { list-style: none; padding: 0; margin-top: 10px; }
+        .info-list li { margin-bottom: 12px; padding-left: 15px; border-left: 2px solid #00e5ff; }
+        .info-btn { width: 42px; height: 42px; border-radius: 4px; display: flex; align-items: center; justify-content: center; background: rgba(20, 20, 25, 0.6); border: 1px solid #333; color: #666; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(4px); padding: 0; flex-shrink: 0; }
+        .info-btn:hover { border-color: #00e5ff; color: #00e5ff; background: rgba(0, 229, 255, 0.05); box-shadow: 0 0 10px rgba(0, 229, 255, 0.15); }
         @media (max-width: 768px) {
     body { padding: 15px; }
     .header { flex-direction: column; align-items: flex-start; }
@@ -246,7 +259,26 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
     </style>
 </head>
 <body>
-
+<div id="infoModal" class="info-overlay" onclick="if(event.target===this) this.classList.remove('open')">
+    <div class="info-card">
+        <button class="info-close" onclick="document.getElementById('infoModal').classList.remove('open')">&times;</button>
+        <h2>System Overview</h2>
+        <div class="info-section">
+            This terminal is not a standard portfolio tracker. It is an operational dashboard designed for <strong>On-Chain Forensics & Dynamic Risk Management</strong>, built to monitor risk, track allocation targets, and analyze on-chain capital flows.
+        </div>
+        <div class="info-section">
+            <strong>How to read the architecture:</strong>
+            <ul class="info-list">
+                <li><strong>Dual-State Engine:</strong> Toggle "Market View" to switch between locked Cost Basis (Zero Points) and Live API Valuation.</li>
+                <li><strong>Macro Radar (Top):</strong> Monitors the strict 33/33/33 target split between TradFi (The Rock), Liquidity (The Parachute), and Crypto.</li>
+                <li><strong>DeFi Matrix (Bottom):</strong> Granular monitoring of capital efficiency. It tracks active leverage, Loan-to-Value (LTV), and peg health of collateralized positions.</li>
+            </ul>
+        </div>
+        <div class="info-section" style="color: #888; font-style: italic; font-size: 0.85em; border-top: 1px dashed #333; padding-top: 15px;">
+            *Terminal starts in standby mode to reduce visual noise. Click any slice of the macro doughnut chart to awaken the detailed modules.
+        </div>
+    </div>
+</div>
 <div id="adminModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -266,6 +298,11 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
             <p>On-Chain Management & Analysis Operational Protocol | Flow Architect</p>
             </div>
        <div class="controls-wrapper">
+           <button id="infoBtn" class="info-btn" title="System Overview" onclick="document.getElementById('infoModal').classList.add('open')">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+            </button>
             <div id="forexDisplay" style="color: #666; font-size: 0.85em; font-family: monospace; display: flex; align-items: center; padding-right: 10px; border-right: 1px solid #333;">1€ = $1.080</div>
             <button id="currencyBtn" class="market-btn">€</button>
             <button id="privacyBtn" class="privacy-toggle-cupo">
