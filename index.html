@@ -264,13 +264,13 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
         <button class="info-close" onclick="document.getElementById('infoModal').classList.remove('open')">&times;</button>
         <h2>System Overview</h2>
         <div class="info-section">
-            This terminal is not a standard portfolio tracker. It is an operational dashboard designed for <strong>On-Chain Forensics & Dynamic Risk Management</strong>, built to monitor risk, track allocation targets, and analyze on-chain capital flows.
+            This terminal is not a standard portfolio tracker. It is an operational dashboard designed for <strong>On-Chain Forensics &amp; Dynamic Risk Management</strong>, built to monitor risk, track allocation targets, and analyze on-chain capital flows.
         </div>
         <div class="info-section">
             <strong>How to read the architecture:</strong>
             <ul class="info-list">
                 <li><strong>Dual-State Engine:</strong> Toggle "Market View" to switch between locked Cost Basis (Zero Points) and Live API Valuation.</li>
-                <li><strong>Macro Radar (Top):</strong> Monitors the strict 33/33/33 target split between TradFi (The Rock), Liquidity (The Parachute), and Crypto.</li>
+                <li><strong>Macro Radar (Top):</strong> Monitors the strict 33/33/33 target split between TradFi Equity, Liquidity Reserve, and Digital Assets.</li>
                 <li><strong>DeFi Matrix (Bottom):</strong> Granular monitoring of capital efficiency. It tracks active leverage, Loan-to-Value (LTV), and peg health of collateralized positions.</li>
             </ul>
         </div>
@@ -295,7 +295,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
     <div class="header">
         <div class="header-title">
             <h1>The Fortress Architecture</h1>
-            <p>On-Chain Management & Analysis Operational Protocol | Flow Architect</p>
+            <p>On-Chain Management &amp; Analysis Operational Protocol | Flow Architect</p>
             </div>
        <div class="controls-wrapper">
            <button id="infoBtn" class="info-btn" title="System Overview" onclick="document.getElementById('infoModal').classList.add('open')">
@@ -336,21 +336,21 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
             <div id="macroTgtWrapper" class="chart-layer">
                 <div class="macro-tgt-row">
                     <div class="macro-tgt-header">
-                        <span class="macro-tgt-title" style="color: #3a7bd5;">The Rock (ETF)</span>
+                        <span class="macro-tgt-title" style="color: #3a7bd5;">TradFi Equity (EUNL)</span>
                         <span class="macro-tgt-numbers" id="macro-tgt-etf-num">--% / 33.33%</span>
                     </div>
                     <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-etf-bar"></div></div>
                 </div>
                 <div class="macro-tgt-row">
                     <div class="macro-tgt-header">
-                        <span class="macro-tgt-title" style="color: #78788c;">The Parachute (Liquidity)</span>
+                        <span class="macro-tgt-title" style="color: #78788c;">Liquidity Reserve (Stables)</span>
                         <span class="macro-tgt-numbers" id="macro-tgt-liq-num">--% / 33.33%</span>
                     </div>
                     <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-liq-bar"></div></div>
                 </div>
                 <div class="macro-tgt-row">
                     <div class="macro-tgt-header">
-                        <span class="macro-tgt-title" style="color: #ffb74d;">Big Cap (Crypto)</span>
+                        <span class="macro-tgt-title" style="color: #ffb74d;">Digital Assets (Crypto)</span>
                         <span class="macro-tgt-numbers" id="macro-tgt-crypto-num">--% / 33.33%</span>
                     </div>
                     <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-crypto-bar"></div></div>
@@ -426,7 +426,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <th class="sortable-header" onclick="handleSort('24h')" style="width: 14%;">24H (%)</th>
                             <th class="sortable-header" onclick="handleSort('capital')" style="width: 18%;">Capital (Value / Invested)</th>
                             <th style="width: 18%; text-align: center;">
-                                PnL & Status <br>
+                                PnL &amp; Status <br>
                                 <span class="micro-switch-group">
                                     [<span class="micro-switch inactive" id="btn-val" onclick="switchView('pnl_val')">VAL</span>|<span class="micro-switch active-switch inactive" id="btn-pct" onclick="switchView('pnl_pct')">%</span>|<span class="micro-switch inactive" id="btn-tgt" onclick="switchView('tgt')">TGT</span>]
                                 </span>
@@ -491,7 +491,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                             <td id="col6-low-cap-index"><span class="badge" id="status-low-cap-index">Pending...</span></td>
                         </tr>
                         <tr data-id="msci-world">
-                            <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #4fc3f7;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> The Rock (EUNL)</div></td>
+                            <td><div class="protocol-name"><svg class="crypto-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #4fc3f7;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg> MSCI World ETF (EUNL)</div></td>
                             <td><div class="qty-cell" id="qty-msci-world">--</div></td>
                             <td><div class="ticker-val" id="price-msci-world">--</div></td>
                             <td><div class="ticker-val" id="change-msci-world">--</div></td>
@@ -507,8 +507,8 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                     <thead>
                         <tr>
                             <th style="width: 20%;">Protocol</th>
-                            <th style="width: 20%;">Ticker & Capital</th>
-                            <th style="width: 20%;">Performance & Risk</th>
+                            <th style="width: 20%;">Ticker &amp; Capital</th>
+                            <th style="width: 20%;">Performance &amp; Risk</th>
                             <th style="width: 40%;">Operational Outlook (Flow Architect)</th>
                         </tr>
                     </thead>
@@ -676,7 +676,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
     <div class="footer-wrapper">
         <div class="footer-note">
             <strong>Architect's Note</strong>
-            Quantitative data extraction is only half the work. This architecture is built following the principles of the <em>Neuro-Ethics of Sensitivity</em>: the forensic monitoring of flows is not just numerical, but serves to decode the behavioral matrix that moves on-chain capital.
+            Quantitative data extraction is only half the work. This architecture is built on a forensic approach to on-chain flow analysis: monitoring capital movements not just as numerical data, but as a behavioral matrix that drives on-chain decision-making.
         </div>
         <div class="due-diligence">
             * On-Chain Verification and Wallet Address details are strictly maintained under secure OpSec protocols.<br>
@@ -716,7 +716,7 @@ document.addEventListener('keydown', function(e) {
 async function initLiveEngine() {
     const ids = 'bitcoin,ethereum,solana,binancecoin,bittensor,ondo-finance,jup-solana,tether,chaingpt,jupiter-exchange-solana,realio-network,spx6900';
 
-    // MOTORE 1: CRYPTO – usa allorigins.win
+    // MOTORE 1: CRYPTO
     try {
        const cryptoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur,usd&include_24hr_change=true&x_cg_demo_api_key=CG-KtjDDqNTQV913sibchfargSc`;
 const res = await fetch(cryptoUrl);
@@ -732,13 +732,13 @@ const res = await fetch(cryptoUrl);
             document.getElementById('liveSignal').style.backgroundColor = "#00e676";
             updateForexDisplay();
         }
-        console.log("✅ Motore Crypto: Online via allorigins");
+        console.log("✅ Motore Crypto: Online");
     } catch (err) {
         console.warn("🟡 Motore Crypto Offline:", err.message);
         document.getElementById('liveSignal').style.backgroundColor = "orange";
     }
 
-    // MOTORE 2: ETF – usa allorigins.win
+    // MOTORE 2: ETF
     try {
         const etfProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(
             'https://query1.finance.yahoo.com/v8/finance/chart/EUNL.DE'
@@ -758,7 +758,7 @@ const res = await fetch(cryptoUrl);
     eur_24h_change: etf24hChange, 
     usd_24h_change: etf24hChange 
 };
-            console.log(`✅ Motore ETF: ${liveEtfPrice}€ via allorigins`);
+            console.log(`✅ Motore ETF: ${liveEtfPrice}€`);
         } else {
             throw new Error("Dati Yahoo illeggibili");
         }
@@ -772,7 +772,6 @@ const res = await fetch(cryptoUrl);
 };
     }
 
-    // ── QUI METTI IL CONTROLLO FINALE ────────────────────────────────
     if (!isLiveConnected) {
         const msg = document.createElement('span');
         msg.style.color = '#ff5252';
@@ -787,7 +786,7 @@ const res = await fetch(cryptoUrl);
 
     let dataMacroBase = []; let dataMacroMarket = [];
     let dataCryptoBase = []; let dataCryptoMarket = [];
-    let currentTotalCryptoValue = 0; // Per calcolo TGT Crypto
+    let currentTotalCryptoValue = 0;
 
 function calculateDynamicData() {
     const p = CONFIG.PORTFOLIO;
@@ -796,7 +795,6 @@ function calculateDynamicData() {
 
     const getBaseVal = (asset) => p.crypto[asset].qty * p.crypto[asset].basePriceEur;
 
-    // --- 1. CALCOLO BASE (Punti Zero + Minusvalenza Parcl) ---
     let btcBase = getBaseVal('bitcoin');
     let ethBase = getBaseVal('ethereum');
     let solBase = getBaseVal('solana');
@@ -812,11 +810,9 @@ function calculateDynamicData() {
     let totalCryptoBaseEur = btcBase + ethBase + solBase + bnbBase + taoBase + ondoBase + indexBaseEur;
     let etfBaseEur = p.etf['msci-world'].qty * p.etf['msci-world'].basePriceEur;
     
-    // Calcolo Base Liquidità (EURC + USDC al prezzo di carico)
     let usdcBaseEur = p.liquidity.usdc.qty * p.liquidity.usdc.basePriceEur;
     let liqBaseEur = p.liquidity.eurc + usdcBaseEur;
 
-    // --- 2. CALCOLO LIVE (API Sync) ---
     const getLiveVal = (asset) => {
         if(!isLiveConnected || !livePrices[asset]) return getBaseVal(asset);
         return p.crypto[asset].qty * livePrices[asset][cur];
@@ -850,15 +846,11 @@ function calculateDynamicData() {
     let totalCryptoLive = btcLive + ethLive + solLive + bnbLive + taoLive + ondoLive + indexLive;
     currentTotalCryptoValue = totalCryptoLive; 
 
-    // Calcolo Live Liquidità (EURC fisso + USDC esposto al Forex live)
-    // Se isLiveConnected è true, exchangeRateEurUsd è (es.) 1.08. Quindi 100 USDC in EUR = 100 / 1.08
     let usdcLiveEur = isLiveConnected ? (p.liquidity.usdc.qty / exchangeRateEurUsd) : usdcBaseEur;
     let liqLiveEur = p.liquidity.eurc + usdcLiveEur;
 
-    // --- 3. AGGIORNAMENTO ARRAY GRAFICI ---
     let etfBase = cur === 'usd' ? etfBaseEur * exchangeRateEurUsd : etfBaseEur;
     
-    // Seleziona la valuta di visualizzazione per la liquidità sui grafici
     let liqBaseChart = cur === 'usd' ? (p.liquidity.eurc * exchangeRateEurUsd) + p.liquidity.usdc.qty : liqBaseEur;
     let liqLiveChart = cur === 'usd' ? (p.liquidity.eurc * exchangeRateEurUsd) + p.liquidity.usdc.qty : liqLiveEur;
     let cryptoBase = cur === 'usd' ? totalCryptoBaseEur * exchangeRateEurUsd : totalCryptoBaseEur;
@@ -875,7 +867,7 @@ function calculateDynamicData() {
 
     detailConfig[2].dataBase = dataCryptoBase;
     detailConfig[2].dataMarket = dataCryptoMarket;
-    // --- STAMPA DEL NET WORTH DENTRO IL GRAFICO E AUTOFINANZIAMENTO ---
+
         const totalInvested = dataMacroBase[0] + dataMacroBase[1] + dataMacroBase[2];
         const totalLive = dataMacroMarket[0] + dataMacroMarket[1] + dataMacroMarket[2];
         const heroEl = document.getElementById('chartHeroMetric');
@@ -886,7 +878,6 @@ function calculateDynamicData() {
             heroEl.innerHTML = `${sym} ${valToShow.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             heroEl.style.color = isMarketView ? '#00e676' : '#dce6f2';
             
-            // Attiva il respiro in Market View, lo spegne in Base Cost
             if (isMarketView) {
                 heroEl.classList.add('live-pulse-text');
             } else {
@@ -916,11 +907,8 @@ function calculateDynamicData() {
     updateSalaControllo(); 
     updateMacroTgt(); 
 
-    // ── AUTO-SYNC STORICO ──────────────
         if (isMarketView && isLiveConnected) {
             const totalLive = dataMacroMarket[0] + dataMacroMarket[1] + dataMacroMarket[2];
-            
-            // FILTRO FORENSE: Normalizziamo sempre in Euro prima di scrivere nell'Hard Disk (STORICO)
             const totalLiveEur = currentCurrency === 'usd' ? (totalLive / exchangeRateEurUsd) : totalLive;
             
             const lastPoint = STORICO[STORICO.length - 1];
@@ -931,7 +919,10 @@ function calculateDynamicData() {
             } else {
                 STORICO.push({ d: today, i: lastPoint.i, v: Math.round(totalLiveEur) });
             }
-        localStorage.setItem('fortezza_storico', JSON.stringify(STORICO));
+
+            // ✅ FIX: Persist STORICO to localStorage
+            localStorage.setItem('fortezza_storico', JSON.stringify(STORICO));
+            
             if (historyChart) {
                 const pts = getFilteredData(currentTf);
                 historyChart.data.labels = pts.map(p => p.d);
@@ -941,26 +932,20 @@ function calculateDynamicData() {
             }
         }
 
-    // --- GESTIONE PRIVACY DEFI MATRIX ---
     document.querySelectorAll('#slide-defi .ticker-usd[data-cg-id]').forEach(el => {
         const assetId = el.getAttribute('data-cg-id');
-        
-        // 1. Rimuove eventuali virgole dal numero per impedire il blocco del calcolo
         const rawQty = el.getAttribute('data-qty').replace(/,/g, '');
         const qty = parseFloat(rawQty);
         
-        // 2. Salva il testo originale (Base Cost) come backup la prima volta
         if (!el.hasAttribute('data-base-html')) {
             el.setAttribute('data-base-html', el.innerHTML);
         }
 
        if (isLiveConnected && isMarketView && livePrices[assetId]) {
-    // Modo Live — DeFi Matrix sempre in USD (prezzi on-chain nativi)
     const usdPrice = livePrices[assetId].usd || livePrices[assetId].eur * exchangeRateEurUsd;
     const val = qty * usdPrice;
     el.innerHTML = `Net Value: $ <span class="sensitive-data">${val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>`;            el.classList.add('live-value-highlight');
         } else {
-            // Modo Punti Zero (o se API Offline): Ripristina il backup esatto
             el.innerHTML = el.getAttribute('data-base-html');
             el.classList.remove('live-value-highlight');
         }
@@ -1019,7 +1004,6 @@ function calculateDynamicData() {
                 if (isMarketView && isOnline) {
                     changeEl.innerHTML = `<span style="color: ${change24h >= 0 ? '#00e676' : '#ff5252'}; font-family: monospace; font-weight:600;">${change24h > 0 ? '+' : ''}${change24h.toFixed(2)}%</span>`;
                     
-                    // --- IL TUO INTERVENTO: 2 decimali ETF, 4 decimali Crypto ---
                     let maxDec = asset.type === 'etf' ? 2 : 4;
                     priceEl.innerHTML = `<span class="live-value-highlight">${isBasket ? 'Avg Index' : sym + ' ' + liveP.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: maxDec})}</span>`;
                     
@@ -1072,9 +1056,8 @@ function calculateDynamicData() {
         if (mode === 'pnl_pct') document.getElementById('btn-pct').classList.add('active-switch');
         if (mode === 'tgt') document.getElementById('btn-tgt').classList.add('active-switch');
 
-        updateSalaControllo(); // 1. Cambia l'aspetto visivo (da € a %)
+        updateSalaControllo();
 
-        // 2. Applica l'ordinamento se sei su VAL o %
         if (mode === 'pnl_val' || mode === 'pnl_pct') {
             handleSort(mode);
         }
@@ -1095,7 +1078,6 @@ function calculateDynamicData() {
         }
     }
 
-    // --- CALCOLO MACRO TGT (IL RADAR 33/33/33) ---
     function updateMacroTgt() {
         const dataSet = isMarketView ? dataMacroMarket : dataMacroBase;
         const total = dataSet[0] + dataSet[1] + dataSet[2];
@@ -1111,10 +1093,8 @@ function calculateDynamicData() {
             const bar = document.getElementById(`macro-tgt-${id}-bar`);
             const num = document.getElementById(`macro-tgt-${id}-num`);
             
-            // --- MODIFICA PRIVACY RADAR MACRO (Incluso % attuale) ---
             num.innerHTML = `<span class="sensitive-data">${pct.toFixed(1)}%</span> / ${target}%`;
             
-            // Visualizzazione Barra
             if (delta >= 0) {
                 bar.className = 'macro-bar-fill over';
                 bar.style.width = `${Math.min(Math.abs(delta) * 3, 50)}%`; 
@@ -1232,7 +1212,6 @@ function calculateDynamicData() {
 
             const titles = ["Portfolio History", "Control Room (Live Tickers)", "DeFi Protocol Matrix"];
             
-            // Qui definiamo i tre sottotitoli esatti (il terzo mantiene il testo originale con il pallino)
             const subtitles = [
                 `<span class="legend-text">Forensic Analysis | Net Fiat vs Global PnL</span>`,
                 `<span class="legend-text">Asset Surveillance | Targets & Rebalancing</span>`,
@@ -1241,7 +1220,6 @@ function calculateDynamicData() {
 
             tableTitle.textContent = titles[slideIndex] || titles[0];
             
-            // Animazione di dissolvenza
             const subtitleEl = document.getElementById('dynamicSubtitle');
             if (subtitleEl) {
                 subtitleEl.style.opacity = '0';
@@ -1303,9 +1281,8 @@ marketBtn.addEventListener('click', () => {
             viewModeText.innerHTML = `Current View: <strong>Cost Basis (Zero Points)</strong>`;
         }
 
-        // --- SINCRONIZZAZIONE GRAFICO STORICO ---
         if (typeof historyChart !== 'undefined' && historyChart) {
-            historyChart.setDatasetVisibility(0, isMarketView); // Nasconde o mostra la linea del mercato
+            historyChart.setDatasetVisibility(0, isMarketView);
             historyChart.update();
         }
 
@@ -1321,7 +1298,6 @@ marketBtn.addEventListener('click', () => {
         if(activeMacroIndex !== null) detailChart.update();
     }
 
-    // --- MODIFICA PRIVACY TOOLTIP GRAFICI ---
    const opsecTooltip = {
         callbacks: {
             title: () => null, 
@@ -1333,7 +1309,6 @@ marketBtn.addEventListener('click', () => {
                     return `${context.label} | █ █ █ (${percentage})`; 
                 }
 
-                // Seleziona l'ETF (Index 0): mostra solo la percentuale
                 if (typeof activeMacroIndex !== 'undefined' && activeMacroIndex === 0) {
                     return `${context.label} | ${percentage}`;
                 }
@@ -1371,7 +1346,7 @@ marketBtn.addEventListener('click', () => {
 
     const detailConfig = {
         0: { 
-            title: 'Sector ETF (MSCI World)',
+            title: 'TradFi Equity — Sector Breakdown (MSCI World)',
             labels: ['Tech', 'Financials', 'Industrials', 'Cons. Discretionary', 'Health Care', 'Comm Services', 'Other Sectors'],
             dataBase: [26.2, 16.74, 11.61, 9.82, 9.66, 8.98, 17.0], dataMarket: [26.2, 16.74, 11.61, 9.82, 9.66, 8.98, 17.0], 
             getGradients: (ctx, area) => [
@@ -1379,13 +1354,13 @@ marketBtn.addEventListener('click', () => {
             ]
         },
         1: { 
-            title: 'Liquidity (The Parachute)',
+            title: 'Liquidity Reserve — Capital Allocation',
             labels: ['Kamino (USDG)', 'Jupiter Lend (EURC)', 'Sail Money (EURC)', 'Loopscale (ONyc)', 'Carrot (ONyc)'],
             dataBase: [3900, 5655, 5655, 3900, 3510], dataMarket: [3900, 5655, 5655, 3900, 3510],
             getGradients: (ctx, area) => [ makeGrad(ctx, area, '#2b2b36', '#3f3f4e'), makeGrad(ctx, area, '#3f3f4e', '#595968'), makeGrad(ctx, area, '#595968', '#78788c'), makeGrad(ctx, area, '#78788c', '#9a9ab0'), makeGrad(ctx, area, '#9a9ab0', '#c2c2d6') ] 
         },
-2: { 
-            title: 'Crypto Breakdown (AI & RWA)',
+        2: { 
+            title: 'Digital Assets — Crypto Breakdown (AI & RWA)',
             labels: ['BTC', 'ETH', 'SOL', 'BNB', 'TAO (AI)', 'ONDO (RWA)', 'Low Cap Index'],
             dataBase: [], dataMarket: [], 
             getGradients: (ctx, area) => [
@@ -1395,7 +1370,7 @@ marketBtn.addEventListener('click', () => {
                 makeGrad(ctx, area, '#ffe082', '#f3ba2f'), 
                 makeGrad(ctx, area, '#ce93d8', '#9c27b0'), 
                 makeGrad(ctx, area, '#80deea', '#00bcd4'),
-                makeGrad(ctx, area, '#b0bec5', '#616161') // Grigio Argento per l'Index
+                makeGrad(ctx, area, '#b0bec5', '#616161')
             ]
         }
     };
@@ -1407,7 +1382,7 @@ marketBtn.addEventListener('click', () => {
     const macroChart = new Chart(ctxMacro, {
         type: 'doughnut',
         data: {
-            labels: ['The Rock (ETF)', 'The Parachute (Liquidity)', 'Crypto (Big Cap & Alt)'],
+            labels: ['TradFi Equity (EUNL)', 'Liquidity Reserve (Stables)', 'Digital Assets (Crypto)'],
             datasets: [{
                 data: [33, 33, 33], 
                 backgroundColor: function(context) {
@@ -1432,11 +1407,10 @@ marketBtn.addEventListener('click', () => {
                         document.body.classList.add('unlocked'); 
                         document.querySelectorAll('.micro-switch.inactive').forEach(el => el.classList.remove('inactive'));
                         
-                        // Ordine di accensione per Metriche e Autofinanziamento
                         const heroEl = document.getElementById('chartHeroMetric');
                         if (heroEl) heroEl.style.opacity = '1';
                         const subEl = document.getElementById('chartHeroSub');
-                        if (subEl) subEl.style.opacity = '1'; // Ora si accende sempre
+                        if (subEl) subEl.style.opacity = '1';
 
                         updateSalaControllo(); 
                     }
@@ -1493,17 +1467,13 @@ marketBtn.addEventListener('click', () => {
             privacyBtnToggle.style.backgroundColor = isOn ? '#ff5252' : '#121212';
             privacyBtnToggle.style.borderColor = isOn ? '#ff5252' : '#1a4abf';
             
-            // Forza il re-render istantaneo di tutti i grafici per applicare/rimuovere i blocchi neri
             if (typeof historyChart !== 'undefined' && historyChart) historyChart.update('none');
             if (typeof macroChart !== 'undefined' && macroChart) macroChart.update('none');
             if (typeof detailChart !== 'undefined' && detailChart) detailChart.update('none');
         });
     }
 
-   
-  // ── STORICO DATASET  ──────────────
-const STORICO = [
-  // --- ANNO 2021 (Genesi) ---
+  const STORICO = [
   { d: "2021-05-01", i: 90, v: 144 },
   { d: "2021-06-01", i: 90, v: 90 },
   { d: "2021-07-01", i: 1938, v: 1794 },
@@ -1512,8 +1482,6 @@ const STORICO = [
   { d: "2021-10-01", i: 3635, v: 4871 },
   { d: "2021-11-01", i: 3834, v: 6408 },
   { d: "2021-12-01", i: 3834, v: 5862 },
-
-  // --- ANNO 2022 (Bear Market) ---
   { d: "2022-01-01", i: 3908, v: 5546 },
   { d: "2022-02-01", i: 3974, v: 4711 },
   { d: "2022-03-01", i: 4060, v: 4586 },
@@ -1526,8 +1494,6 @@ const STORICO = [
   { d: "2022-10-01", i: 4395, v: 3116 },
   { d: "2022-11-01", i: 4395, v: 3455 },
   { d: "2022-12-01", i: 4953, v: 3292 },
-
-  // --- ANNO 2023 (Accumulo e Transizione) ---
   { d: "2023-01-01", i: 5589, v: 3791 },
   { d: "2023-02-01", i: 5589, v: 4852 },
   { d: "2023-03-01", i: 6201, v: 4918 },
@@ -1540,8 +1506,6 @@ const STORICO = [
   { d: "2023-10-01", i: 6201, v: 5265 },
   { d: "2023-11-01", i: 6201, v: 6650 },
   { d: "2023-12-01", i: 6201, v: 7511 },
-
-  // --- ANNO 2024 (La Strutturazione) ---
   { d: "2024-01-01", i: 6201, v: 8256 },
   { d: "2024-02-01", i: 6431, v: 8210 },
   { d: "2024-03-01", i: 7535, v: 13131 },
@@ -1554,8 +1518,6 @@ const STORICO = [
   { d: "2024-10-01", i: 16934, v: 22733 },
   { d: "2024-11-01", i: 18131, v: 30506 },
   { d: "2024-12-01", i: 20054, v: 36180 },
-
-  // --- ANNO 2025 (Fase Flow Architect) ---
   { d: "2025-01-01", i: 21548, v: 34788 },
   { d: "2025-02-01", i: 22016, v: 34940 },
   { d: "2025-03-01", i: 23864, v: 33825 },
@@ -1568,8 +1530,6 @@ const STORICO = [
   { d: "2025-10-01", i: 30299, v: 44909 },
   { d: "2025-11-01", i: 28985, v: 40552 },
   { d: "2025-12-01", i: 29765, v: 38017 },
-
-  // --- ANNO 2026 (Protocollo 10k & Presente) ---
   { d: "2026-01-01", i: 30545, v: 37206 },
   { d: "2026-01-08", i: 30545, v: 38388 },
   { d: "2026-01-15", i: 30658, v: 39842 },
@@ -1578,13 +1538,12 @@ const STORICO = [
   { d: "2026-02-08", i: 30658, v: 32222 },
   { d: "2026-02-15", i: 30658, v: 31438 },
   { d: "2026-02-17", i: 31914, v: 32639 },
-  { d: "2026-02-21", i: 66686, v: 67525 }, // <-- Fase 1 Ribilanciamento
-  { d: "2026-02-24", i: 71795, v: 71713 }, // <-- Fase 2
-  { d: "2026-03-01", i: 73340, v: 74279 }, // <-- Consolidamento
-  { d: "2026-03-10", i: 73340, v: 75754 }  // <-- OGGI
+  { d: "2026-02-21", i: 66686, v: 67525 },
+  { d: "2026-02-24", i: 71795, v: 71713 },
+  { d: "2026-03-01", i: 73340, v: 74279 },
+  { d: "2026-03-10", i: 73340, v: 75754 }
 ];
 
-// ── HISTORY CHART ──────────────────────────────────────────────
 let historyChart = null;
 
 function getFilteredData(tf) {
@@ -1642,7 +1601,7 @@ function renderHistoryChart(tf = "ALL") {
 
         if (el.length > 0) {
             const pts = getFilteredData(currentTf);
-            const ptStart = pts[0]; // Il punto zero del timeframe
+            const ptStart = pts[0];
             const pt = pts[el[0].index];
             
             if (pt) {
@@ -1661,14 +1620,13 @@ function renderHistoryChart(tf = "ALL") {
                         
                         if (subEl) {
                             const hoverFiat = pt.i * rate;
-                            const hoverTotalPnl = (pt.v * rate) - hoverFiat; // PnL Assoluto
+                            const hoverTotalPnl = (pt.v * rate) - hoverFiat;
                             
                             let displayPnl, displayPct;
                             if (currentTf === "ALL") {
                                 displayPnl = hoverTotalPnl;
                                 displayPct = hoverFiat > 0 ? (displayPnl / hoverFiat) * 100 : 0;
                             } else {
-                                // DEPURA I BONIFICI: PnL di oggi meno PnL all'inizio del periodo
                                 const startFiat = ptStart.i * rate;
                                 const startTotalPnl = (ptStart.v * rate) - startFiat;
                                 displayPnl = hoverTotalPnl - startTotalPnl; 
@@ -1734,7 +1692,7 @@ function resetChartToNormal(chart, legendDot, heroEl, subEl, sym) {
             heroEl.classList.add('live-pulse-text'); 
             if (subEl) {
                 const pts = getFilteredData(currentTf);
-                const ptStart = pts[0]; // Baseline del timeframe
+                const ptStart = pts[0];
 
                 const fiatPuro = STORICO[STORICO.length - 1].i; 
                 const currentFiat = fiatPuro * rate;
@@ -1745,7 +1703,6 @@ function resetChartToNormal(chart, legendDot, heroEl, subEl, sym) {
                     displayPnl = currentTotalPnl;
                     displayPct = currentFiat > 0 ? (displayPnl / currentFiat) * 100 : 0;
                 } else {
-                    // DEPURA I BONIFICI per il calcolo PnL del periodo
                     const startFiat = ptStart.i * rate;
                     const startTotalPnl = (ptStart.v * rate) - startFiat;
                     displayPnl = currentTotalPnl - startTotalPnl;
@@ -1788,7 +1745,6 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
       historyChart.data.datasets[1].data = pts.map(p => p.i);
       historyChart.update("active");
 
-      // Forza l'aggiornamento visivo immediato del PnL
       const legendDot = document.querySelector('.hleg-dot.val');
       const heroEl = document.getElementById('chartHeroMetric');
       const subEl = document.getElementById('chartHeroSub');
@@ -1798,13 +1754,14 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
   });
 });
 
-// ── MOTORE TERMINALE (LOCAL STORAGE POTENZIATO) ──────────────
 function loadLocalData() {
-   const savedStorico = localStorage.getItem('fortezza_storico');
-if (savedStorico) {
-    const parsed = JSON.parse(savedStorico);
-    STORICO.splice(0, STORICO.length, ...parsed);
-}
+    // ✅ FIX: Restore STORICO from localStorage first
+    const savedStorico = localStorage.getItem('fortezza_storico');
+    if (savedStorico) {
+        const parsed = JSON.parse(savedStorico);
+        STORICO.splice(0, STORICO.length, ...parsed);
+    }
+
     const saved = localStorage.getItem('fortezza_config');
     if (saved) {
         const parsed = JSON.parse(saved);
@@ -1835,7 +1792,6 @@ function openAdmin() {
     const p = CONFIG.PORTFOLIO;
     const currentFiat = STORICO[STORICO.length - 1].i;
     
-    // Grafica per doppio input (Qty + Prezzo)
     const createAssetInput = (id, label, qty, price) => `
         <div class="admin-form-group" style="flex-direction: column; align-items: flex-start; gap: 8px;">
             <label style="color:#dce6f2;">${label}</label>
@@ -1845,23 +1801,22 @@ function openAdmin() {
             </div>
         </div>`;
 
-    // Grafica per input singolo
     const createInput = (id, label, val) => `
         <div class="admin-form-group">
             <label>${label}</label>
             <input type="number" step="any" id="admin_${id}" value="${val}" style="background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 4px; font-family: monospace; width: 140px; text-align: right; outline: none;">
         </div>`;
         
-    let html = `<div class="admin-section-title">Big Cap & Altcoin</div>`;
+    let html = `<div class="admin-section-title">Digital Assets — Big Cap & Altcoin</div>`;
     html += createAssetInput('btc', 'Bitcoin (BTC)', p.crypto.bitcoin.qty, p.crypto.bitcoin.basePriceEur);
     html += createAssetInput('eth', 'Ethereum (ETH)', p.crypto.ethereum.qty, p.crypto.ethereum.basePriceEur);
     html += createAssetInput('sol', 'Solana (SOL)', p.crypto.solana.qty, p.crypto.solana.basePriceEur);
     html += createAssetInput('bnb', 'Binance Coin (BNB)', p.crypto.binancecoin.qty, p.crypto.binancecoin.basePriceEur);
     html += createAssetInput('tao', 'Bittensor (TAO)', p.crypto.bittensor.qty, p.crypto.bittensor.basePriceEur);
-    html += createAssetInput('ondo', 'Ondo (RWA)', p.crypto['ondo-finance'].qty, p.crypto['ondo-finance'].basePriceEur);
+    html += createAssetInput('ondo', 'Ondo Finance (RWA)', p.crypto['ondo-finance'].qty, p.crypto['ondo-finance'].basePriceEur);
     
-    html += `<div class="admin-section-title">TradFi & Liquidity</div>`;
-    html += createAssetInput('etf', 'The Rock (MSCI World)', p.etf['msci-world'].qty, p.etf['msci-world'].basePriceEur);
+    html += `<div class="admin-section-title">TradFi Equity & Liquidity Reserve</div>`;
+    html += createAssetInput('etf', 'MSCI World ETF (EUNL)', p.etf['msci-world'].qty, p.etf['msci-world'].basePriceEur);
     html += createAssetInput('usdc', 'Dollar Liquidity (USDC)', p.liquidity.usdc.qty, p.liquidity.usdc.basePriceEur);
     html += createInput('liq', 'Euro Liquidity (EURC)', p.liquidity.eurc);
     
