@@ -931,7 +931,7 @@ function calculateDynamicData() {
             } else {
                 STORICO.push({ d: today, i: lastPoint.i, v: Math.round(totalLiveEur) });
             }
-            
+        localStorage.setItem('fortezza_storico', JSON.stringify(STORICO));
             if (historyChart) {
                 const pts = getFilteredData(currentTf);
                 historyChart.data.labels = pts.map(p => p.d);
@@ -1800,6 +1800,11 @@ document.querySelectorAll(".tf-btn").forEach(btn => {
 
 // ── MOTORE TERMINALE (LOCAL STORAGE POTENZIATO) ──────────────
 function loadLocalData() {
+   const savedStorico = localStorage.getItem('fortezza_storico');
+if (savedStorico) {
+    const parsed = JSON.parse(savedStorico);
+    STORICO.splice(0, STORICO.length, ...parsed);
+}
     const saved = localStorage.getItem('fortezza_config');
     if (saved) {
         const parsed = JSON.parse(saved);
