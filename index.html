@@ -270,7 +270,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
             <strong>How to read the architecture:</strong>
             <ul class="info-list">
                 <li><strong>Dual-State Engine:</strong> Toggle "Market View" to switch between locked Cost Basis (Zero Points) and Live API Valuation.</li>
-                <li><strong>Macro Radar (Top):</strong> Monitors the strict 33/33/33 target split between TradFi Equity, Liquidity Reserve, and Digital Assets.</li>
+                <li><strong>Macro Radar (Top):</strong> Monitors the strict 33/33/33 target split between TradFi Equity, Active Liquidity Stables, and Digital Assets.</li>
                 <li><strong>DeFi Matrix (Bottom):</strong> Granular monitoring of capital efficiency. It tracks active leverage, Loan-to-Value (LTV), and peg health of collateralized positions.</li>
             </ul>
         </div>
@@ -343,7 +343,7 @@ table { width: 100%; border-collapse: collapse; background-color: #151515; borde
                 </div>
                 <div class="macro-tgt-row">
                     <div class="macro-tgt-header">
-                        <span class="macro-tgt-title" style="color: #78788c;">Liquidity Reserve (Stables)</span>
+                        <span class="macro-tgt-title" style="color: #78788c;">Active Liquidity Stables</span>
                         <span class="macro-tgt-numbers" id="macro-tgt-liq-num">--% / 33.33%</span>
                     </div>
                     <div class="macro-bar-container"><div class="macro-bar-fill" id="macro-tgt-liq-bar"></div></div>
@@ -1354,7 +1354,7 @@ marketBtn.addEventListener('click', () => {
             ]
         },
         1: { 
-            title: 'Liquidity Reserve — Capital Allocation',
+            title: 'Active Liquidity Stables — DeFi Allocation',
             labels: ['Kamino (USDG)', 'Jupiter Lend (EURC)', 'Sail Money (EURC)', 'Loopscale (ONyc)', 'Carrot (ONyc)'],
             dataBase: [3900, 5655, 5655, 3900, 3510], dataMarket: [3900, 5655, 5655, 3900, 3510],
             getGradients: (ctx, area) => [ makeGrad(ctx, area, '#2b2b36', '#3f3f4e'), makeGrad(ctx, area, '#3f3f4e', '#595968'), makeGrad(ctx, area, '#595968', '#78788c'), makeGrad(ctx, area, '#78788c', '#9a9ab0'), makeGrad(ctx, area, '#9a9ab0', '#c2c2d6') ] 
@@ -1382,7 +1382,7 @@ marketBtn.addEventListener('click', () => {
     const macroChart = new Chart(ctxMacro, {
         type: 'doughnut',
         data: {
-            labels: ['TradFi Equity (EUNL)', 'Liquidity Reserve (Stables)', 'Digital Assets (Crypto)'],
+            labels: ['TradFi Equity (EUNL)', 'Active Liquidity Stables', 'Digital Assets (Crypto)'],
             datasets: [{
                 data: [33, 33, 33], 
                 backgroundColor: function(context) {
@@ -1815,7 +1815,7 @@ function openAdmin() {
     html += createAssetInput('tao', 'Bittensor (TAO)', p.crypto.bittensor.qty, p.crypto.bittensor.basePriceEur);
     html += createAssetInput('ondo', 'Ondo Finance (RWA)', p.crypto['ondo-finance'].qty, p.crypto['ondo-finance'].basePriceEur);
     
-    html += `<div class="admin-section-title">TradFi Equity & Liquidity Reserve</div>`;
+    html += `<div class="admin-section-title">TradFi Equity & Active Liquidity Stables</div>`;
     html += createAssetInput('etf', 'MSCI World ETF (EUNL)', p.etf['msci-world'].qty, p.etf['msci-world'].basePriceEur);
     html += createAssetInput('usdc', 'Dollar Liquidity (USDC)', p.liquidity.usdc.qty, p.liquidity.usdc.basePriceEur);
     html += createInput('liq', 'Euro Liquidity (EURC)', p.liquidity.eurc);
